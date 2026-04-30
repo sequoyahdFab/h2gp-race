@@ -19,7 +19,8 @@ export default function RacePage({ sessionId, initialRole = 'strategy', onBack }
   const [liveRCUrl, setLiveRCUrl] = useState('');
   const [liveRCEnabled, setLiveRCEnabled] = useState(false);
   const [liveRCStatus, setLiveRCStatus] = useState('');
-  const { session, laps, loading, error, addLap, updateLap } = useRace(sessionId);
+
+  const { session, laps, loading, error, addLap, updateLap, startRace } = useRace(sessionId);
 
   const handleNewLiveLap = useCallback(async (lapTime) => {
     try {
@@ -43,15 +44,31 @@ export default function RacePage({ sessionId, initialRole = 'strategy', onBack }
   if (error) return <div style={{ padding: '2rem' }}><Alert type="danger">Error: {error}</Alert></div>;
 
   const entryProps = { session, laps, addLap, updateLap };
+  const raceStarted = !!session?.race_start_time;
 
   return (
     <div>
       <div className="race-header">
         <div>
           <div className="race-title">{session?.name || 'Race'}</div>
-          <div className="race-subtitle">{session?.race_duration_mins}min · {session?.battery_limit_mah}mAh · {session?.total_sticks} sticks · {laps.length} laps logged</div>
+          <div className="race-subtitle">
+            {session?.race_duration_mins}min · {session?.battery_limit_mah}mAh · {session?.total_sticks} sticks · {laps.length} laps logged
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          {!raceStarted ? (
+            <button
+              className="btn btn-primary"
+              style={{ fontSize: 13, padding: '7px 16px', background: '#DC2626' }}
+              onClick={() => { if (window.confirm('Start the race timer? This cannot be undone.')) startRace(); }}
+            >
+              🏁 Start Race
+            </button>
+          ) : (
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#059669', background: '#ECFDF5', border: '1.5px solid #A7F3D0', borderRadius: 6, padding: '4px 10px' }}>
+              ● Race live
+            </span>
+          )}
           <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 12px', color: liveRCEnabled ? '#059669' : undefined }} onClick={() => setShowLiveRC(!showLiveRC)}>
             LiveRC {liveRCEnabled ? '● live' : 'off'}
           </button>
@@ -63,9 +80,13 @@ export default function RacePage({ sessionId, initialRole = 'strategy', onBack }
       {showLiveRC && (
         <div style={{ background: '#F9FAFB', borderBottom: '1.5px solid #E5E7EB', padding: '12px 16px' }}>
           <div style={{ maxWidth: 700, margin: '0 auto' }}>
-            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8 }}>Paste your LiveRC live results URL — lap times auto-import every 5 seconds</div>
+            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8 }}>
+              Paste your LiveRC live results URL — lap times auto-import every 5 seconds
+            </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-              <input type="text" value={liveRCUrl} onChange={e => setLiveRCUrl(e.target.value)} placeholder="https://yourtrack.liverc.com/results/?p=view_race_result&id=..." style={{ flex: 1, minWidth: 200, fontSize: 12 }} />
+              <input type="text" value={liveRCUrl} onChange={e => setLiveRCUrl(e.target.value)}
+                placeholder="https://yourtrack.liverc.com/results/?p=view_race_result&id=..."
+                style={{ flex: 1, minWidth: 200, fontSize: 12 }} />
               <Btn onClick={() => setLiveRCEnabled(true)} disabled={!liveRCUrl || liveRCEnabled}>Start</Btn>
               <Btn variant="ghost" onClick={() => { setLiveRCEnabled(false); setLiveRCStatus('Stopped'); }}>Stop</Btn>
               {liveRCStatus && <span style={{ fontSize: 12, color: '#6B7280' }}>{liveRCStatus}</span>}
