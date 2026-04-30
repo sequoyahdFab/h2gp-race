@@ -2,19 +2,26 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useLiveRCPoller } from '../hooks/useLiveRC';
 import StrategyDashboard from '../components/StrategyDashboard';
 import { LapTimeEntry, BatteryEntry, FuelCellEntry, VoltageEntry } from '../components/EntryPanels';
+import { PitStopEntry, BatterySwapEntry } from '../components/EventsPanel';
 import { Btn } from '../components/UI';
 
 const ROLES = [
-  { id: 'strategy',  label: 'Strategy',  emoji: '📊' },
-  { id: 'lap-timer', label: 'Lap Timer', emoji: '⏱' },
-  { id: 'battery',   label: 'Battery',   emoji: '🔋' },
-  { id: 'fuel-cell', label: 'Fuel Cell', emoji: '⚗️' },
-  { id: 'voltage',   label: 'Voltage',   emoji: '⚡' },
+  { id: 'strategy',     label: 'Strategy',      emoji: '📊' },
+  { id: 'lap-timer',    label: 'Lap Timer',      emoji: '⏱' },
+  { id: 'battery',      label: 'Battery',        emoji: '🔋' },
+  { id: 'fuel-cell',    label: 'Fuel Cell',      emoji: '⚗️' },
+  { id: 'voltage',      label: 'Voltage',        emoji: '⚡' },
+  { id: 'pit-stop',     label: 'Pit Stops',      emoji: '🔧' },
+  { id: 'battery-swap', label: 'Battery Swap',   emoji: '🔄' },
 ];
 
 const POST_RACE_WINDOW_SECS = 300;
 
-export default function RacePage({ session, laps, addLap, updateLap, startRace, endRace, initialRole = 'strategy', onBack }) {
+export default function RacePage({
+  session, laps, addLap, updateLap, startRace, endRace,
+  events, batteryPacks, addPitStop, addBatterySwap,
+  initialRole = 'strategy', onBack
+}) {
   const [role, setRole] = useState(initialRole);
   const [showLiveRC, setShowLiveRC] = useState(false);
   const [liveRCUrl, setLiveRCUrl] = useState('');
@@ -58,17 +65,19 @@ export default function RacePage({ session, laps, addLap, updateLap, startRace, 
   const raceStarted = !!session.race_start_time;
   const raceEnded   = !!session.race_end_time;
   const entryLocked = raceEnded && postRaceSecsLeft === 0;
+  const pitStops    = (events || []).filter(e => e.event_type === 'pit_stop');
   const entryProps  = { session, laps, addLap, updateLap, locked: entryLocked };
 
   return (
     <div>
+      {/* Header */}
       <div className="race-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 36, width: 'auto' }} />
           <div>
             <div className="race-title">{session.name || 'Race'}</div>
             <div className="race-subtitle">
-              {session.race_duration_mins}min · {session.battery_limit_mah}mAh · {session.total_sticks} sticks · {laps.length} laps
+              {session.race_duration_mins}min · {session.battery_limit_mah}mAh · {session.total_sticks} sticks · {laps.length} laps · {pitStops.length} pit stops
             </div>
           </div>
         </div>
@@ -116,6 +125,7 @@ export default function RacePage({ session, laps, addLap, updateLap, startRace, 
         </div>
       </div>
 
+      {/* LiveRC panel */}
       {showLiveRC && (
         <div style={{ background: '#F9FAFB', borderBottom: '1.5px solid #E5E7EB', padding: '12px 16px' }}>
           <div style={{ maxWidth: 700, margin: '0 auto' }}>
@@ -130,14 +140,16 @@ export default function RacePage({ session, laps, addLap, updateLap, startRace, 
         </div>
       )}
 
+      {/* Locked banner */}
       {entryLocked && (
         <div style={{ background: '#F3F4F6', borderBottom: '1.5px solid #E5E7EB', padding: '10px 16px', textAlign: 'center' }}>
           <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            🔒 Race data locked — post-race entry window closed · Export CSV to download your data
+            🔒 Race data locked — Export CSV to download your data
           </span>
         </div>
       )}
 
+      {/* Role tabs */}
       <div className="tab-bar">
         {ROLES.map(r => (
           <button key={r.id} className={`role-tab${role === r.id ? ' active' : ''}`} onClick={() => setRole(r.id)}>
@@ -146,12 +158,15 @@ export default function RacePage({ session, laps, addLap, updateLap, startRace, 
         ))}
       </div>
 
+      {/* Content */}
       <div style={{ maxWidth: 700, margin: '0 auto', padding: '16px 16px 48px' }}>
-        {role === 'strategy'  && <StrategyDashboard session={session} laps={laps} />}
-        {role === 'lap-timer' && <LapTimeEntry {...entryProps} />}
-        {role === 'battery'   && <BatteryEntry {...entryProps} />}
-        {role === 'fuel-cell' && <FuelCellEntry {...entryProps} />}
-        {role === 'voltage'   && <VoltageEntry {...entryProps} />}
+        {role === 'strategy'     && <StrategyDashboard session={session} laps={laps} pitStops={pitStops} batteryPacks={batteryPacks || []} />}
+        {role === 'lap-timer'    && <LapTimeEntry {...entryProps} />}
+        {role === 'battery'      && <BatteryEntry {...entryProps} />}
+        {role === 'fuel-cell'    && <FuelCellEntry {...entryProps} />}
+        {role === 'voltage'      && <VoltageEntry {...entryProps} />}
+        {role === 'pit-stop'     && <PitStopEntry laps={laps} addPitStop={addPitStop} pitStops={pitStops} locked={entryLocked} />}
+        {role === 'battery-swap' && <BatterySwapEntry laps={laps} batteryPacks={batteryPacks || []} addBatterySwap={addBatterySwap} locked={entryLocked} />}
       </div>
     </div>
   );

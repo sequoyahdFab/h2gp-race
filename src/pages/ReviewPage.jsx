@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { calcStats, fmtTime, fmtDuration, lapSpeed } from '../lib/calc';
+import { reasonMeta } from '../lib/constants';
 
 Chart.register(...registerables);
 
@@ -31,7 +32,7 @@ function SectionTitle({ children }) {
   );
 }
 
-export default function ReviewPage({ session, laps, onBack }) {
+export default function ReviewPage({ session, laps, events = [], batteryPacks = [], onBack }) {
   const lapChartRef = useRef(null);
   const batChartRef = useRef(null);
   const lapChartInst = useRef(null);
@@ -264,6 +265,56 @@ export default function ReviewPage({ session, laps, onBack }) {
                   </div>
                 );
               })}
+            </div>
+          </>
+        )}
+
+        {/* Pit stops */}
+        {events.filter(e => e.event_type === 'pit_stop').length > 0 && (
+          <>
+            <SectionTitle>Pit Stop Log</SectionTitle>
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
+              {events.filter(e => e.event_type === 'pit_stop').map(p => {
+                const m = reasonMeta(p.reason);
+                return (
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid #F3F4F6' }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                        Lap {p.lap_number} · {p.reason}
+                      </div>
+                      {p.notes && <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>{p.notes}</div>}
+                    </div>
+                    <div style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: m.bg, color: m.color, fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {m.category}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Battery packs */}
+        {batteryPacks.length > 0 && (
+          <>
+            <SectionTitle>Battery Pack Log</SectionTitle>
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
+              {batteryPacks.map((p, i) => (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '7px 0', borderBottom: i < batteryPacks.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#EFF6FF', border: '2px solid #3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 800, color: '#1E40AF', flexShrink: 0 }}>
+                    {i + 1}
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                      {p.pack_name} · {p.capacity_mah} mAh
+                    </div>
+                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                      Swapped in at lap {p.swap_lap}{p.notes ? ` · ${p.notes}` : ''}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </>
         )}

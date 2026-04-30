@@ -3,10 +3,12 @@ import SessionPage from './pages/SessionPage';
 import RacePage from './pages/RacePage';
 import ReviewPage from './pages/ReviewPage';
 import { useRace } from './hooks/useRace';
+import { useRaceEvents } from './hooks/useRaceEvents';
 
 // Wrapper that decides live vs review based on race_end_time
 function RaceRouter({ sessionId, initialRole, onBack }) {
   const { session, laps, loading, error, addLap, updateLap, startRace, endRace } = useRace(sessionId);
+  const { events, batteryPacks, addPitStop, addBatterySwap } = useRaceEvents(sessionId);
 
   if (loading) return (
     <div style={{ padding: '3rem', textAlign: 'center', color: '#9CA3AF', fontSize: 14, fontFamily: "'Barlow', sans-serif" }}>
@@ -19,7 +21,7 @@ function RaceRouter({ sessionId, initialRole, onBack }) {
 
   // Completed race → Review mode
   if (session?.race_end_time) {
-    return <ReviewPage session={session} laps={laps} onBack={onBack} />;
+    return <ReviewPage session={session} laps={laps} events={events} batteryPacks={batteryPacks} onBack={onBack} />;
   }
 
   // Active race → Live dashboard
@@ -31,6 +33,10 @@ function RaceRouter({ sessionId, initialRole, onBack }) {
       updateLap={updateLap}
       startRace={startRace}
       endRace={endRace}
+      events={events}
+      batteryPacks={batteryPacks}
+      addPitStop={addPitStop}
+      addBatterySwap={addBatterySwap}
       initialRole={initialRole}
       onBack={onBack}
     />
