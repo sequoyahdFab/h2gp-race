@@ -107,5 +107,11 @@ export function useSessions() {
     return data;
   };
 
-  return { sessions, loading, createSession };
+  const deleteSession = async (id) => {
+    const { error } = await supabase.from('sessions').delete().eq('id', id);
+    if (error) throw error;
+    setSessions(prev => prev.filter(s => s.id !== id));
+  };
+
+  return { sessions, loading, createSession, deleteSession };
 }

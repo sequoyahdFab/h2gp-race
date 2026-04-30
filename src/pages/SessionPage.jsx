@@ -3,7 +3,8 @@ import { useSessions } from '../hooks/useRace';
 import { Btn, Card, SectionLabel, Alert } from '../components/UI';
 
 export default function SessionPage({ onSelect }) {
-  const { sessions, loading, createSession } = useSessions();
+  const { sessions, loading, createSession, deleteSession } = useSessions();
+  const [deletingId, setDeletingId] = useState(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
@@ -14,6 +15,19 @@ export default function SessionPage({ onSelect }) {
   });
 
   const f = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+
+  const handleDelete = async (e, id, name) => {
+    e.stopPropagation(); // don't open the session
+    if (!window.confirm(`Permanently delete "${name}" and all its lap data? This cannot be undone.`)) return;
+    setDeletingId(id);
+    try {
+      await deleteSession(id);
+    } catch (err) {
+      alert('Error deleting session: ' + err.message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handleCreate = async () => {
     if (!form.name.trim()) { setError('Enter a session name'); return; }
@@ -122,7 +136,16 @@ export default function SessionPage({ onSelect }) {
                       {new Date(s.created_at).toLocaleDateString()} · {s.race_duration_mins}min · {s.battery_limit_mah}mAh · {s.total_sticks} sticks
                     </div>
                   </div>
-                  <span style={{ color: '#9CA3AF', fontSize: 18, marginLeft: 8 }}>→</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 8, flexShrink: 0 }}>
+                    <span style={{ color: '#9CA3AF', fontSize: 18 }}>→</span>
+                    <button
+                      onClick={e => handleDelete(e, s.id, s.name)}
+                      disabled={deletingId === s.id}
+                      style={{ background: 'none', border: '1px solid #FECACA', borderRadius: 5, padding: '4px 8px', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#DC2626', fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.04em', opacity: deletingId === s.id ? 0.5 : 1 }}
+                    >
+                      {deletingId === s.id ? '…' : 'Delete'}
+                    </button>
+                  </div>
                 </div>
               );
             })}
