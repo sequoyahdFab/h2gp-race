@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSessions } from '../hooks/useRace';
 import { Btn, Card, SectionLabel, Alert } from '../components/UI';
+import { TooltipLabel } from '../components/Tooltip';
 import { RACE_PRESETS } from '../lib/constants';
 
 export default function SessionPage({ onSelect }) {
@@ -56,9 +57,24 @@ export default function SessionPage({ onSelect }) {
     finally { setDeletingId(null); }
   };
 
+  const TIPS = {
+    race_duration_mins: 'Total length of the race in minutes. Regional = 120, States = 240, Worlds = 360.',
+    battery_limit_mah: 'Maximum total milliamp-hours allowed across all battery packs for the entire race. Set by H2GP rulebook.',
+    num_battery_packs: 'How many battery packs you will use during the race. Each pack is 2 cells.',
+    target_pack_mins: 'How long each battery pack should last. Race duration ÷ number of packs. E.g. 240min ÷ 3 packs = 80 min.',
+    total_sticks: 'Total number of hydrogen sticks allowed for the race. Regional = 10, States = 18, Worlds = 22.',
+    max_mah_per_min: 'Maximum battery drain rate allowed. The pace advisor warns if you exceed this. Default 26.13 mAh/min.',
+    target_lap_time: 'The ideal lap time in seconds your driver is aiming for. Used to classify laps as Good/Fast/Slow.',
+    fast_threshold: 'Lap times below this (in seconds) are flagged as Too Fast — burning battery too quickly.',
+    slow_threshold: 'Lap times above this (in seconds) are flagged as Too Slow — under-utilizing battery.',
+    stick_min_mins: 'Minimum time a hydrogen stick should run before swapping. The advisor opens the swap window at this point.',
+    stick_max_mins: 'Maximum time a hydrogen stick should run. The advisor triggers a SWAP NOW alert at this point.',
+    fc_low_amps: 'Fuel cell current (A) below which the advisor triggers a stick swap. Typical trigger is 1.0A.',
+  };
+
   const inp = (label, key, opts = {}) => (
     <div>
-      <label className="field-label">{label}</label>
+      <TooltipLabel label={label} tip={TIPS[key] || label} />
       <input type="number" value={form[key]} step={opts.step || 1}
         onChange={e => f(key, parseFloat(e.target.value) || 0)} />
     </div>

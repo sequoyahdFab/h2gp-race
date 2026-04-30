@@ -19,7 +19,8 @@ export function LapTimeEntry({ session, laps, addLap, updateLap, locked }) {
   const [msg, setMsg] = useState('');
   const stats = calcStats(laps, session);
   const nextLap = laps.length + 1;
-  const pendingLap = [...laps].reverse().find(l => !l.lap_time);
+  // Always apply to most recent lap — never fill backwards
+  const pendingLap = laps.length > 0 ? laps[laps.length - 1] : null;
 
   const handleSubmit = async () => {
     if (!lapTime) return;
@@ -76,7 +77,8 @@ export function BatteryEntry({ session, laps, addLap, updateLap, locked }) {
   const [msg, setMsg] = useState('');
   const stats = calcStats(laps, session);
   const nextLap = laps.length + 1;
-  const pendingLap = [...laps].reverse().find(l => !l.battery_cap_mah && !l.battery_current_a);
+  // Always apply to most recent lap — never fill backwards
+  const pendingLap = laps.length > 0 ? laps[laps.length - 1] : null;
   const last = laps[laps.length - 1];
   const batRem = session ? Math.max(0, session.battery_limit_mah - (last?.battery_cap_mah || 0)) : null;
   const batPct = session && last?.battery_cap_mah ? Math.max(0, 100 - (parseFloat(last.battery_cap_mah) / session.battery_limit_mah) * 100) : null;
@@ -138,7 +140,8 @@ export function FuelCellEntry({ session, laps, addLap, updateLap, locked }) {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
   const nextLap = laps.length + 1;
-  const pendingLap = [...laps].reverse().find(l => !l.fc_cap_mah && !l.fc_current_a);
+  // Always apply to most recent lap — never fill backwards
+  const pendingLap = laps.length > 0 ? laps[laps.length - 1] : null;
   const last = laps[laps.length - 1];
   const recentFC = laps.slice(-3).map(l => parseFloat(l.fc_current_a)).filter(v => !isNaN(v) && v > 0);
   const avgFC = recentFC.length > 0 ? recentFC.reduce((s,v)=>s+v,0)/recentFC.length : null;
@@ -202,7 +205,8 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
   const nextLap = laps.length + 1;
-  const pendingLap = [...laps].reverse().find(l => !l.battery_voltage_v);
+  // Always apply to most recent lap — never fill backwards
+  const pendingLap = laps.length > 0 ? laps[laps.length - 1] : null;
   const last = laps[laps.length - 1];
 
   const handleSubmit = async () => {
