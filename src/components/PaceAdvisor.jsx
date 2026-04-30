@@ -56,7 +56,7 @@ export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
 
   const {
     state, title, detail,
-    currentBurnRate, neededBurnRate, targetBurnRate,
+    currentBurnRate,
     projectedPackMins, packTimeRemMins, packMahRem,
     totalPctUsed,
   } = guidance;
