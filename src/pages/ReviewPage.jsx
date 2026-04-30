@@ -50,8 +50,6 @@ export default function ReviewPage({ session, laps, onBack }) {
   // Best / worst lap
   const validLaps = laps.filter(l => parseFloat(l.lap_time) > 0 && parseFloat(l.lap_time) < 300);
   const bestLap = validLaps.length > 0 ? validLaps.reduce((b, l) => parseFloat(l.lap_time) < parseFloat(b.lap_time) ? l : b) : null;
-  const worstLap = validLaps.length > 0 ? validLaps.reduce((w, l) => parseFloat(l.lap_time) > parseFloat(w.lap_time) ? l : w) : null;
-
   // Total battery used
   const lastLap = laps[laps.length - 1];
   const totalBatUsed = lastLap?.battery_cap_mah ? Math.round(parseFloat(lastLap.battery_cap_mah)) : null;
@@ -77,7 +75,7 @@ export default function ReviewPage({ session, laps, onBack }) {
             data,
             borderColor: '#059669',
             backgroundColor: 'rgba(5,150,105,0.06)',
-            tension: 0.3, pointRadius: 3, fill: true,
+            tension: 0.3, fill: true,
             pointBackgroundColor: validLaps.map(l =>
               swapSet.has(l.lap_number) ? '#D97706' :
               parseFloat(l.lap_time) === parseFloat(bestLap?.lap_time) ? '#DC2626' : '#059669'
@@ -112,6 +110,7 @@ export default function ReviewPage({ session, laps, onBack }) {
         },
       },
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [laps, session]);
 
   // Battery + FC drain chart

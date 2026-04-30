@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useLiveRCPoller } from '../hooks/useLiveRC';
 import StrategyDashboard from '../components/StrategyDashboard';
 import { LapTimeEntry, BatteryEntry, FuelCellEntry, VoltageEntry } from '../components/EntryPanels';
-import { Btn, Alert } from '../components/UI';
+import { Btn } from '../components/UI';
 
 const ROLES = [
   { id: 'strategy',  label: 'Strategy',  emoji: '📊' },
