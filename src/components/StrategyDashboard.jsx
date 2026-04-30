@@ -75,13 +75,17 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
   const last = laps[laps.length - 1];
   const pitSet = new Set(pitStops.map(p => p.lap_number));
 
+  const isPractice = session?.preset_key === 'practice';
   const alerts = [];
-  if (batPct < 15) alerts.push({ type: 'danger', msg: `Battery critical: ${Math.round(batPct)}% remaining` });
-  else if (batPct < 30) alerts.push({ type: 'warn', msg: 'Battery below 30% — consider slowing pace' });
-  if (mahPerMin && session?.max_mah_per_min && mahPerMin > session.max_mah_per_min)
-    alerts.push({ type: 'danger', msg: `Drain ${mahPerMin.toFixed(1)} mAh/min exceeds limit of ${session.max_mah_per_min}` });
-  if (sticksUsed >= totalSticks) alerts.push({ type: 'danger', msg: 'All H2 sticks depleted' });
-  else if (sticksUsed === totalSticks - 1) alerts.push({ type: 'warn', msg: 'Last H2 stick in use' });
+  if (!isPractice) {
+    if (batPct < 15) alerts.push({ type: 'danger', msg: `Battery critical: ${Math.round(batPct)}% remaining` });
+    else if (batPct < 30) alerts.push({ type: 'warn', msg: 'Battery below 30% — consider slowing pace' });
+    if (mahPerMin && session?.max_mah_per_min && session.max_mah_per_min < 90 && mahPerMin > session.max_mah_per_min)
+      alerts.push({ type: 'danger', msg: `Drain ${mahPerMin.toFixed(1)} mAh/min exceeds limit of ${session.max_mah_per_min}` });
+    if (sticksUsed >= totalSticks) alerts.push({ type: 'danger', msg: 'All H2 sticks depleted' });
+    else if (sticksUsed === totalSticks - 1) alerts.push({ type: 'warn', msg: 'Last H2 stick in use' });
+  }
+  if (isPractice && n > 0) alerts.push({ type: 'info', msg: 'Practice session — no budget limits enforced' });
 
   return (
     <div>

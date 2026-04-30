@@ -2,7 +2,28 @@ import React from 'react';
 import { calcPackPaceGuidance, fmtTime } from '../lib/calc';
 
 export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
+  const isPractice = session?.preset_key === 'practice';
   if (!session || laps.length < 3) return null;
+
+  // Practice mode — show burn rate info but no enforcement
+  if (isPractice) {
+    const last = laps[laps.length - 1];
+    const validLaps = laps.filter(l => parseFloat(l.lap_time) > 0 && parseFloat(l.lap_time) < 300);
+    const totalSec = validLaps.reduce((s, l) => s + parseFloat(l.lap_time), 0);
+    const totalMins = totalSec / 60;
+    const packMahUsed = last?.battery_cap_mah ? parseFloat(last.battery_cap_mah) : 0;
+    const burnRate = totalMins > 0 && packMahUsed > 0 ? packMahUsed / totalMins : null;
+    return (
+      <div className="advisor advisor-hold" style={{ marginBottom: 16 }}>
+        <div className="advisor-title">Practice Mode — No limits active</div>
+        <div className="advisor-detail">
+          {burnRate
+            ? `Current burn rate: ${burnRate.toFixed(1)} mAh/min · ${Math.round(packMahUsed)} mAh used · no budget enforcement`
+            : 'Log laps to see burn rate data'}
+        </div>
+      </div>
+    );
+  }
 
   const maxMahPerMin = session.max_mah_per_min || 26.13;
   const targetPackMins = session.target_pack_mins || 80;

@@ -110,7 +110,7 @@ export default function SessionPage({ onSelect }) {
           </div>
 
           {/* Pack preview */}
-          {activePreset && (
+          {activePreset && !activePreset.isPractice && (
             <div style={{ background: activePreset.bg, border: `1px solid ${activePreset.color}30`, borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
               <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: activePreset.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                 Optimal battery configuration
@@ -170,12 +170,19 @@ export default function SessionPage({ onSelect }) {
             </div>
           </details>
 
+          {/* Practice mode note */}
+          {activePreset?.isPractice && (
+            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 7, padding: '10px 14px', marginBottom: 14, fontSize: 12, color: '#6B7280', fontFamily: "'Barlow', sans-serif" }}>
+              <strong style={{ color: '#374151' }}>Practice mode</strong> — no mAh budget enforcement or race limits. All telemetry and lap data is still logged. Duration and config are fully adjustable in Advanced configuration above.
+            </div>
+          )}
+
           {error && <Alert type="danger">{error}</Alert>}
           <Btn onClick={handleCreate} disabled={creating || !selectedPreset}>
             {creating ? 'Creating…' : selectedPreset ? `+ Create ${activePreset.label} Session` : 'Select a race type first'}
           </Btn>
           {!selectedPreset && (
-            <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 8 }}>Select Regionals, States, or Worlds above to continue</div>
+            <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 8 }}>Select a race type above to continue</div>
           )}
         </Card>
 
