@@ -143,8 +143,18 @@ export function FuelCellEntry({ session, laps, addLap, updateLap, locked }) {
   // Always apply to most recent lap — never fill backwards
   const pendingLap = laps.length > 0 ? laps[laps.length - 1] : null;
   const last = laps[laps.length - 1];
-  const recentFC = laps.slice(-3).map(l => parseFloat(l.fc_current_a)).filter(v => !isNaN(v) && v > 0);
-  const avgFC = recentFC.length > 0 ? recentFC.reduce((s,v)=>s+v,0)/recentFC.length : null;
+  // EMA-7 matching the stick advisor logic
+  const EMA_ALPHA = 2 / (7 + 1);
+  const fcReadings = laps.map(l => parseFloat(l.fc_current_a)).filter(v => !isNaN(v) && v > 0);
+  let fcEMA = null;
+  if (fcReadings.length > 0) {
+    fcEMA = fcReadings[0];
+    for (let i = 1; i < fcReadings.length; i++) {
+      fcEMA = EMA_ALPHA * fcReadings[i] + (1 - EMA_ALPHA) * fcEMA;
+    }
+  }
+  const last5FC = fcReadings.slice(-5);
+  const avgFC = last5FC.length > 0 ? last5FC.reduce((s,v)=>s+v,0)/last5FC.length : null;
   const fcLow = session?.fc_low_amps || 1.0;
 
   const handleSubmit = async () => {
@@ -169,11 +179,12 @@ export function FuelCellEntry({ session, laps, addLap, updateLap, locked }) {
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:8, marginBottom:16 }}>
         <Metric label="FC cumulative" value={last?.fc_cap_mah ? Math.round(last.fc_cap_mah) : 0} unit="mAh" />
         <Metric label="Last FC current" value={last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit="A" />
-        <Metric label="3-lap avg FC" value={avgFC ? avgFC.toFixed(2) : '—'} unit="A" />
+        <Metric label="EMA-7" value={fcEMA ? fcEMA.toFixed(2) : '—'} unit="A (smoothed)" />
+        <Metric label="5-lap avg" value={avgFC ? avgFC.toFixed(2) : '—'} unit="A" />
         <Metric label="Low trigger" value={fcLow} unit="A" />
       </div>
-      {avgFC !== null && avgFC <= fcLow && <Alert type="danger">FC current at {avgFC.toFixed(2)}A — below {fcLow}A trigger. Notify strategy!</Alert>}
-      {avgFC !== null && avgFC <= fcLow + 0.3 && avgFC > fcLow && <Alert type="warn">FC current dropping ({avgFC.toFixed(2)}A) — approaching swap trigger</Alert>}
+      {(fcEMA !== null && fcEMA <= fcLow) || (avgFC !== null && avgFC <= fcLow) ? <Alert type="danger">FC EMA {(fcEMA ?? avgFC)?.toFixed(2)}A — below {fcLow}A trigger. Notify strategy!</Alert> : null}
+      {fcEMA !== null && fcEMA <= fcLow + 0.3 && fcEMA > fcLow ? <Alert type="warn">FC EMA {fcEMA.toFixed(2)}A — approaching {fcLow}A trigger</Alert> : null}
       <Card>
         <SectionLabel style={{ marginTop:0 }}>Enter reading — lap {pendingLap?.lap_number || nextLap}</SectionLabel>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>

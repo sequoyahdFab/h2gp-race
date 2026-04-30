@@ -68,7 +68,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
     });
   }, [laps, session, pitStops]);
 
-  const { n, batUsed, batRem, batPct, avgLap, mahPerMin, fcPerMin, batTimeRem, estTotalLaps, sticksUsed, advisorState, advisorTitle, advisorDetail, raceMins, totalSticks } = stats;
+  const { n, batUsed, batRem, batPct, avgLap, mahPerMin, fcPerMin, batTimeRem, estTotalLaps, sticksUsed, advisorState, advisorTitle, advisorDetail, raceMins, totalSticks, fcEMA, fcAvg5, trendDeclining } = stats;
 
   const timePct = session?.race_start_time ? Math.min(100, (elapsed / (raceMins * 60)) * 100) : 0;
   const timeRem = Math.max(0, raceMins * 60 - elapsed);
@@ -116,7 +116,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
         <Metric label="Bat used" value={Math.round(batUsed)} unit="mAh" />
         <Metric label="Bat remain" value={Math.round(batRem)} unit="mAh" />
         <Metric label="mAh/min" value={mahPerMin ? mahPerMin.toFixed(1) : '—'} />
-        <Metric label="FC current" value={last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit="A" />
+        <Metric label="FC EMA-7" value={fcEMA ? fcEMA.toFixed(2) : last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit={trendDeclining ? 'A ↓ declining' : 'A'} />
         <Metric label="Voltage" value={last?.battery_voltage_v ? parseFloat(last.battery_voltage_v).toFixed(1) : '—'} unit="V" />
       </div>
 

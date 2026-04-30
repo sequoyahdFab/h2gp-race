@@ -75,19 +75,52 @@ export function calcStats(laps, session) {
   const timeSinceSwap =
     lapsSinceSwap.reduce((s, l) => s + (parseFloat(l.lap_time) || 0), 0) / 60;
 
-  const recentFC = laps
-    .slice(-3)
+  // ── EMA-7 FC current with trend confirmation ──────────────────────────
+  // Build array of valid FC readings on current stick
+  const fcReadings = lapsSinceSwap
     .map(l => parseFloat(l.fc_current_a))
     .filter(v => !isNaN(v) && v > 0);
-  const avgRecentFC =
-    recentFC.length > 0
-      ? recentFC.reduce((s, v) => s + v, 0) / recentFC.length
-      : null;
+
+  // Exponential Moving Average — alpha = 2/(7+1) = 0.25
+  // Weights recent readings more while smoothing noise over ~7 laps
+  const EMA_ALPHA = 2 / (7 + 1);
+  let fcEMA = null;
+  if (fcReadings.length > 0) {
+    fcEMA = fcReadings[0];
+    for (let i = 1; i < fcReadings.length; i++) {
+      fcEMA = EMA_ALPHA * fcReadings[i] + (1 - EMA_ALPHA) * fcEMA;
+    }
+  }
+
+  // Trend confirmation — compare avg of last 3 vs prior 3 on this stick
+  const recentWindow = fcReadings.slice(-3).filter(v => v > 0);
+  const priorWindow  = fcReadings.slice(-6, -3).filter(v => v > 0);
+  const recentAvg = recentWindow.length > 0
+    ? recentWindow.reduce((s, v) => s + v, 0) / recentWindow.length : null;
+  const priorAvg  = priorWindow.length > 0
+    ? priorWindow.reduce((s, v) => s + v, 0) / priorWindow.length  : null;
+  const trendDeclining = recentAvg !== null && priorAvg !== null && recentAvg < priorAvg;
+
+  // 5-lap simple average — matches your spreadsheet baseline as fallback
+  const last5FC = fcReadings.slice(-5);
+  const avg5FC = last5FC.length > 0
+    ? last5FC.reduce((s, v) => s + v, 0) / last5FC.length : null;
 
   const timeOverMin = timeSinceSwap >= stickMinMins;
   const timeOverMax = timeSinceSwap >= stickMaxMins;
-  const fcLow = avgRecentFC !== null && avgRecentFC <= fcLowAmps;
-  const fcWarn = avgRecentFC !== null && avgRecentFC <= fcLowAmps + 0.3;
+
+  // Trigger: EMA below threshold AND trend declining
+  // OR 5-lap avg below threshold (spreadsheet fallback when not enough data for trend)
+  const fcLow = (fcEMA !== null && fcEMA <= fcLowAmps && trendDeclining)
+    || (avg5FC !== null && avg5FC <= fcLowAmps);
+
+  // Warn: EMA approaching threshold with declining trend
+  const fcWarn = fcEMA !== null
+    && fcEMA <= (fcLowAmps + 0.3)
+    && (trendDeclining || fcEMA <= fcLowAmps + 0.15);
+
+  // Display value — prefer EMA, fall back to 5-lap avg
+  const fcDisplay = fcEMA ?? avg5FC;
 
   let advisorState = 'hold';
   let advisorTitle = 'Hold — stick healthy';
@@ -108,16 +141,20 @@ export function calcStats(laps, session) {
     if (timeOverMax)
       reasons.push(`${timeSinceSwap.toFixed(1)}min elapsed (max ${stickMaxMins}min)`);
     if (fcLow)
-      reasons.push(`FC current ${avgRecentFC?.toFixed(2)}A (below ${fcLowAmps}A trigger)`);
+      reasons.push(`FC EMA ${fcDisplay?.toFixed(2)}A <= ${fcLowAmps}A${trendDeclining ? ' · trend declining confirmed' : ' · 5-lap avg trigger'}`);
     advisorDetail = reasons.join(' · ');
   } else if (timeOverMin && fcWarn) {
     advisorState = 'soon';
-    advisorTitle = 'Swap soon — conditions met';
-    advisorDetail = `${timeSinceSwap.toFixed(1)}min elapsed · FC avg ${avgRecentFC?.toFixed(2)}A — watch for drop below ${fcLowAmps}A`;
+    advisorTitle = 'Swap soon — watch FC current';
+    advisorDetail = `${timeSinceSwap.toFixed(1)}min elapsed · EMA ${fcDisplay?.toFixed(2)}A${trendDeclining ? ' · trend declining' : ''} — approaching ${fcLowAmps}A trigger`;
   } else {
     const remaining = stickMinMins - timeSinceSwap;
-    advisorDetail = `Time on stick: ${timeSinceSwap.toFixed(1)}min${remaining > 0 ? ` · ${remaining.toFixed(1)}min until swap window` : ' · swap window open'} · FC avg: ${avgRecentFC ? avgRecentFC.toFixed(2) + 'A' : '—'}`;
+    advisorDetail = `Time on stick: ${timeSinceSwap.toFixed(1)}min${remaining > 0 ? ` · ${remaining.toFixed(1)}min until swap window` : ' · swap window open'} · FC EMA: ${fcDisplay ? fcDisplay.toFixed(2) + 'A' : '—'}${trendDeclining ? ' · trend declining' : ''}`;
   }
+
+  // Export for display
+  const fcEMADisplay = fcEMA;
+  const fcAvg5Display = avg5FC;
 
   // Pace assessment
   const pace = avgLap ? lapSpeed(avgLap, fastThreshold, slowThreshold) : null;
@@ -148,7 +185,10 @@ export function calcStats(laps, session) {
     estTotalLaps,
     sticksUsed,
     timeSinceSwap,
-    avgRecentFC,
+    fcEMA: fcEMADisplay,
+    fcAvg5: fcAvg5Display,
+    fcDisplay,
+    trendDeclining,
     pace,
     advisorState,
     advisorTitle,
