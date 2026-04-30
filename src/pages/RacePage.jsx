@@ -49,10 +49,13 @@ export default function RacePage({ sessionId, initialRole = 'strategy', onBack }
   return (
     <div>
       <div className="race-header">
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 36, width: 'auto' }} />
+          <div>
           <div className="race-title">{session?.name || 'Race'}</div>
           <div className="race-subtitle">
             {session?.race_duration_mins}min · {session?.battery_limit_mah}mAh · {session?.total_sticks} sticks · {laps.length} laps logged
+          </div>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>

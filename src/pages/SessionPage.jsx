@@ -28,21 +28,41 @@ export default function SessionPage({ onSelect }) {
   const inp = (label, key, opts = {}) => (
     <div>
       <label className="field-label">{label}</label>
-      <input type="number" value={form[key]} step={opts.step || 1} onChange={e => f(key, parseFloat(e.target.value) || 0)} />
+      <input type="number" value={form[key]} step={opts.step || 1}
+        onChange={e => f(key, parseFloat(e.target.value) || 0)} />
     </div>
   );
 
   return (
     <div>
+      {/* Hero with logo */}
       <div className="session-hero">
-        <div className="session-logo">H2GP</div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#374151', marginTop: 6, letterSpacing: '0.12em' }}>RACE CONTROL</div>
+        <img
+          src="/h2gplogo.png"
+          alt="Sequoyah Racing"
+          style={{ height: 120, width: 'auto', marginBottom: 12 }}
+        />
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 13, fontWeight: 700,
+          color: '#6B7280', letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+        }}>
+          Race Control Dashboard
+        </div>
         <div className="session-tagline">hydrogen · fuel cell · endurance · real-time telemetry</div>
       </div>
 
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px' }}>
         <Card style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 14 }}>New Race Session</div>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: 18, fontWeight: 800,
+            color: '#111827', marginBottom: 14,
+            textTransform: 'uppercase', letterSpacing: '0.04em',
+          }}>
+            New Race Session
+          </div>
 
           <div style={{ marginBottom: 14 }}>
             <label className="field-label">Session name</label>
@@ -75,18 +95,20 @@ export default function SessionPage({ onSelect }) {
 
           {error && <Alert type="danger">{error}</Alert>}
           <Btn onClick={handleCreate} disabled={creating}>
-            {creating ? 'Creating…' : '+ Create session'}
+            {creating ? 'Creating…' : '+ Create Session'}
           </Btn>
         </Card>
 
         {!loading && sessions.length > 0 && (
           <div>
-            <SectionLabel>Past sessions</SectionLabel>
+            <SectionLabel>Past Sessions</SectionLabel>
             {sessions.map(s => (
               <div key={s.id} className="session-item" onClick={() => onSelect(s.id, 'strategy')}>
                 <div>
                   <div className="session-name">{s.name}</div>
-                  <div className="session-meta">{new Date(s.created_at).toLocaleDateString()} · {s.race_duration_mins}min · {s.battery_limit_mah}mAh · {s.total_sticks} sticks</div>
+                  <div className="session-meta">
+                    {new Date(s.created_at).toLocaleDateString()} · {s.race_duration_mins}min · {s.battery_limit_mah}mAh · {s.total_sticks} sticks
+                  </div>
                 </div>
                 <span style={{ color: '#9CA3AF', fontSize: 20 }}>→</span>
               </div>
