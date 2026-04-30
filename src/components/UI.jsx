@@ -188,7 +188,7 @@ export function Btn({ children, onClick, variant = 'primary', disabled, style })
       style={{
         borderRadius: 'var(--border-radius-md)',
         padding: '8px 16px', fontSize: 13, fontWeight: 500,
-        cursor: disabled ? 'not-allowed', opacity: disabled ? 0.5 : 1,
+        cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1,
         ...styles[variant], ...style,
       }}
     >
