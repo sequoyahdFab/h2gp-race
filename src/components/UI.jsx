@@ -1,5 +1,5 @@
 import React from 'react';
-import { lapSpeed } from '../lib/calc';
+
 
 export function Metric({ label, value, unit, highlight }) {
   return (

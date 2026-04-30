@@ -3,7 +3,7 @@ import { useRace } from '../hooks/useRace';
 import { useLiveRCPoller } from '../hooks/useLiveRC';
 import StrategyDashboard from '../components/StrategyDashboard';
 import { LapTimeEntry, BatteryEntry, FuelCellEntry, VoltageEntry } from '../components/EntryPanels';
-import { Btn, Card, SectionLabel, Alert } from '../components/UI';
+import { Btn, Alert } from '../components/UI';
 
 const ROLES = [
   { id: 'strategy',  label: 'Strategy',  emoji: '📊' },
