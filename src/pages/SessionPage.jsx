@@ -101,18 +101,31 @@ export default function SessionPage({ onSelect }) {
 
         {!loading && sessions.length > 0 && (
           <div>
-            <SectionLabel>Past Sessions</SectionLabel>
-            {sessions.map(s => (
-              <div key={s.id} className="session-item" onClick={() => onSelect(s.id, 'strategy')}>
-                <div>
-                  <div className="session-name">{s.name}</div>
-                  <div className="session-meta">
-                    {new Date(s.created_at).toLocaleDateString()} · {s.race_duration_mins}min · {s.battery_limit_mah}mAh · {s.total_sticks} sticks
+            <SectionLabel>Race Archive</SectionLabel>
+            {sessions.map(s => {
+              const isComplete = !!s.race_end_time;
+              const isLive = !!s.race_start_time && !s.race_end_time;
+              const statusClass = isComplete ? 'session-item-complete' : isLive ? 'session-item-active' : 'session-item-new';
+              return (
+                <div key={s.id} className={`session-item ${statusClass}`} onClick={() => onSelect(s.id, 'strategy')}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <div className="session-name">{s.name}</div>
+                      {isComplete && (
+                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 10, fontWeight: 700, color: '#065F46', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Complete</span>
+                      )}
+                      {isLive && (
+                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 10, fontWeight: 700, color: '#991B1B', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>● Live</span>
+                      )}
+                    </div>
+                    <div className="session-meta">
+                      {new Date(s.created_at).toLocaleDateString()} · {s.race_duration_mins}min · {s.battery_limit_mah}mAh · {s.total_sticks} sticks
+                    </div>
                   </div>
+                  <span style={{ color: '#9CA3AF', fontSize: 18, marginLeft: 8 }}>→</span>
                 </div>
-                <span style={{ color: '#9CA3AF', fontSize: 20 }}>→</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
