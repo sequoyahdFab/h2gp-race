@@ -80,10 +80,10 @@ export default function StrategyDashboard({ session, laps }) {
   }, [laps, session]);
 
   const {
-    n, batUsed, batRem, batPct, totalSec, avgLap, mahPerMin,
+    n, batUsed, batRem, batPct, avgLap, mahPerMin,
     fcPerMin, batTimeRem, estTotalLaps, sticksUsed,
     advisorState, advisorTitle, advisorDetail,
-    pace, raceMins, maxBat, totalSticks,
+    raceMins, totalSticks,
   } = stats;
 
   const timePct = session?.race_start_time

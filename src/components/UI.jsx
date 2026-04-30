@@ -1,5 +1,5 @@
 import React from 'react';
-import { lapSpeed, fmtTime } from '../lib/calc';
+import { lapSpeed } from '../lib/calc';
 
 // ── Metric card ──────────────────────────────────────────────────────────────
 export function Metric({ label, value, unit, large }) {

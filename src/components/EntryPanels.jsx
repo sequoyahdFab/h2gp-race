@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Btn, Card, SectionLabel, Alert, Metric } from './UI';
-import { calcStats, fmtTime } from '../lib/calc';
+import { calcStats } from '../lib/calc';
 
 // ── Shared field input ────────────────────────────────────────────────────────
 function Field({ label, id, value, onChange, placeholder, step, type = 'number' }) {
@@ -51,8 +51,6 @@ export function LapTimeEntry({ session, laps, addLap, updateLap }) {
       setSaving(false);
     }
   };
-
-  const handleKey = e => { if (e.key === 'Enter') handleSubmit(); };
 
   return (
     <div>
@@ -307,11 +305,6 @@ export function VoltageEntry({ session, laps, addLap, updateLap }) {
   const nextLap = laps.length + 1;
   const pendingLap = [...laps].reverse().find(l => !l.battery_voltage_v);
   const last = laps[laps.length - 1];
-
-  const voltages = laps
-    .slice(-5)
-    .map(l => parseFloat(l.battery_voltage_v))
-    .filter(v => !isNaN(v) && v > 0);
 
   const handleSubmit = async () => {
     if (!voltage) return;
