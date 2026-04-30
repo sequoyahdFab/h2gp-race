@@ -137,10 +137,10 @@ export default function App() {
 
         .race-header { background: #111827; border-bottom: 2px solid #1F2937; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
         .race-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.02em; text-transform: uppercase; }
-        .race-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: #6B7280; margin-top: 2px; }
+        .race-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; margin-top: 2px; }
 
         .session-hero { background: #111827; border-bottom: 2px solid #1F2937; padding: 32px 24px 28px; text-align: center; }
-        .session-tagline { font-family: 'DM Mono', monospace; font-size: 11px; color: #6B7280; margin-top: 8px; letter-spacing: 0.06em; }
+        .session-tagline { font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; margin-top: 8px; letter-spacing: 0.06em; }
 
         .session-item { background: #FFFFFF; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; display: flex; justify-content: space-between; align-items: center; }
         .session-item:hover { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.08); }

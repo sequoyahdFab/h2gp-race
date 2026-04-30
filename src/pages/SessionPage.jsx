@@ -45,7 +45,7 @@ export default function SessionPage({ onSelect }) {
         <div style={{
           fontFamily: "'Barlow Condensed', sans-serif",
           fontSize: 13, fontWeight: 700,
-          color: '#6B7280', letterSpacing: '0.2em',
+          color: '#D1D5DB', letterSpacing: '0.2em',
           textTransform: 'uppercase',
         }}>
           Race Control Dashboard
