@@ -5,7 +5,7 @@ import StrategyDashboard from '../components/StrategyDashboard';
 import {
   LapTimeEntry, BatteryEntry, FuelCellEntry, VoltageEntry,
 } from '../components/EntryPanels';
-import { Btn, Card, SectionLabel } from '../components/UI';
+import { Btn, Card, SectionLabel, Alert } from '../components/UI';
 
 const ROLES = [
   { id: 'strategy', label: 'Strategy', emoji: '📊' },
