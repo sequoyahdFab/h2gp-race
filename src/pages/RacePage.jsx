@@ -85,7 +85,7 @@ export default function RacePage({ session, laps, addLap, updateLap, startRace, 
               <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#059669', background: '#ECFDF5', border: '1.5px solid #A7F3D0', borderRadius: 6, padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 ● Live
               </span>
-              <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 12px', color: '#DC2626', borderColor: '#FCA5A5' }}
+              <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px', color: '#F87171', borderColor: '#7F1D1D' }}
                 onClick={() => { if (window.confirm('End the race? Lap entry stays open for 5 minutes after.')) endRace(); }}>
                 🏁 End Race
               </button>
@@ -108,11 +108,11 @@ export default function RacePage({ session, laps, addLap, updateLap, startRace, 
               )}
             </div>
           )}
-          <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 12px', color: liveRCEnabled ? '#059669' : undefined }} onClick={() => setShowLiveRC(!showLiveRC)}>
+          <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px', color: liveRCEnabled ? '#1fc98a' : undefined }} onClick={() => setShowLiveRC(!showLiveRC)}>
             LiveRC {liveRCEnabled ? '● live' : 'off'}
           </button>
-          <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 12px' }} onClick={exportCSV}>Export CSV</button>
-          <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 12px' }} onClick={onBack}>← Sessions</button>
+          <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px' }} onClick={exportCSV}>Export CSV</button>
+          <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px' }} onClick={onBack}>← Sessions</button>
         </div>
       </div>
 

@@ -178,8 +178,8 @@ export default function ReviewPage({ session, laps, onBack }) {
             ✓ Race Complete
           </span>
           <button
-            className="btn btn-ghost"
-            style={{ fontSize: 12, padding: '6px 12px' }}
+            className="btn-ghost-dark"
+            style={{ fontSize: 12, padding: '6px 10px' }}
             onClick={() => {
               const header = 'lap_number,lap_time,battery_cap_mah,fc_cap_mah,battery_current_a,fc_current_a,battery_voltage_v,stick_swap,source\n';
               const rows = laps.map(l => [l.lap_number,l.lap_time,l.battery_cap_mah,l.fc_cap_mah,l.battery_current_a,l.fc_current_a,l.battery_voltage_v,l.stick_swap?1:0,l.source].join(',')).join('\n');
@@ -191,7 +191,7 @@ export default function ReviewPage({ session, laps, onBack }) {
           >
             Export CSV
           </button>
-          <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 12px' }} onClick={onBack}>
+          <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px' }} onClick={onBack}>
             ← Sessions
           </button>
         </div>

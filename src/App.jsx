@@ -71,6 +71,8 @@ export default function App() {
         .btn-primary:active { transform: translateY(0); }
         .btn-primary:disabled { background: #A7F3D0; color: #6EE7B7; cursor: not-allowed; transform: none; }
         .btn-ghost { background: #ffffff; color: #374151; border: 1.5px solid #D1D5DB; font-size: 13px; text-transform: none; letter-spacing: 0; }
+        .btn-ghost-dark { background: transparent; color: #D1D5DB; border: 1.5px solid #374151; font-size: 13px; text-transform: none; letter-spacing: 0; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; border-radius: 7px; padding: 9px 20px; cursor: pointer; transition: all 0.15s; }
+        .btn-ghost-dark:hover { background: #1F2937; border-color: #4B5563; color: #FFFFFF; }
         .btn-ghost:hover { background: #F9FAFB; border-color: #9CA3AF; }
         .btn-amber { background: #ffffff; color: #D97706; border: 1.5px solid #FCD34D; }
         .btn-amber:hover { background: #FFFBEB; }
@@ -133,9 +135,9 @@ export default function App() {
         .proj-label { font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500; color: #6B7280; }
         .proj-value { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: #111827; }
 
-        .race-header { background: #FFFFFF; border-bottom: 2px solid #E5E7EB; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-        .race-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #111827; letter-spacing: 0.02em; text-transform: uppercase; }
-        .race-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+        .race-header { background: #111827; border-bottom: 2px solid #1F2937; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        .race-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.02em; text-transform: uppercase; }
+        .race-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: #6B7280; margin-top: 2px; }
 
         .session-hero { background: #111827; border-bottom: 2px solid #1F2937; padding: 32px 24px 28px; text-align: center; }
         .session-tagline { font-family: 'DM Mono', monospace; font-size: 11px; color: #6B7280; margin-top: 8px; letter-spacing: 0.06em; }
