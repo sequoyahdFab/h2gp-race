@@ -197,7 +197,7 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
         </div>
       </div>
 
-      <div style={{ maxWidth: 700, margin: '0 auto', padding: '20px 16px 48px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 24px 48px' }}>
 
         {/* Key stats */}
         <SectionTitle>Race Summary</SectionTitle>

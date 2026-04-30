@@ -154,7 +154,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
 
       {/* Recent laps */}
       <SectionLabel>Recent laps</SectionLabel>
-      <div style={{ overflowX: 'auto', border: '1.5px solid #E5E7EB', borderRadius: 8, maxHeight: 280, overflowY: 'auto' }}>
+      <div style={{ overflowX: 'auto', border: '1.5px solid #E5E7EB', borderRadius: 8, maxHeight: 360, overflowY: 'auto' }}>
         <table className="data-table" style={{ minWidth: 500 }}>
           <thead>
             <tr>{['#','Time','Speed','Bat mAh','FC mAh','Bat A','FC A','Volts','Event'].map(h => <th key={h}>{h}</th>)}</tr>

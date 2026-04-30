@@ -39,7 +39,7 @@ export function LapTimeEntry({ session, laps, addLap, updateLap, locked }) {
         <div className="role-name">⏱ Lap Timer</div>
         <div className="role-desc">Enter each lap time from LiveRC as the car crosses the line</div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(105px, 1fr))', gap: 8, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8, marginBottom: 16 }}>
         <Metric label="Laps logged" value={laps.length} />
         <Metric label="Next lap" value={`#${nextLap}`} />
         <Metric label="Avg lap" value={stats.avgLap ? stats.avgLap.toFixed(1) : '—'} unit="sec" />
@@ -100,7 +100,7 @@ export function BatteryEntry({ session, laps, addLap, updateLap, locked }) {
         <div className="role-name">🔋 Battery Telemetry</div>
         <div className="role-desc">Read battery capacity (cumulative mAh) and current (A) from JETI screen</div>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(105px, 1fr))', gap:8, marginBottom:16 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:8, marginBottom:16 }}>
         <Metric label="Battery used" value={last?.battery_cap_mah ? Math.round(last.battery_cap_mah) : 0} unit="mAh" />
         <Metric label="Remaining" value={batRem !== null ? Math.round(batRem) : '—'} unit="mAh" />
         <Metric label="Remain %" value={batPct !== null ? `${Math.round(batPct)}%` : '—'} highlight={batPct !== null && batPct > 40} />
@@ -163,7 +163,7 @@ export function FuelCellEntry({ session, laps, addLap, updateLap, locked }) {
         <div className="role-name">⚗️ Fuel Cell Telemetry</div>
         <div className="role-desc">Read FC capacity (cumulative mAh) and current (A) from JETI screen</div>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(105px, 1fr))', gap:8, marginBottom:16 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:8, marginBottom:16 }}>
         <Metric label="FC cumulative" value={last?.fc_cap_mah ? Math.round(last.fc_cap_mah) : 0} unit="mAh" />
         <Metric label="Last FC current" value={last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit="A" />
         <Metric label="3-lap avg FC" value={avgFC ? avgFC.toFixed(2) : '—'} unit="A" />
@@ -224,7 +224,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
         <div className="role-name">⚡ Voltage + Swap</div>
         <div className="role-desc">Read battery voltage from JETI screen. Log H2 stick swaps here.</div>
       </div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(105px, 1fr))', gap:8, marginBottom:16 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(130px, 1fr))', gap:8, marginBottom:16 }}>
         <Metric label="Last voltage" value={last?.battery_voltage_v ? parseFloat(last.battery_voltage_v).toFixed(1) : '—'} unit="V" />
         <Metric label="Laps logged" value={laps.length} />
         <Metric label="Stick swaps" value={laps.filter(l=>l.stick_swap).length} />

@@ -76,7 +76,7 @@ export default function SessionPage({ onSelect }) {
         <div className="session-tagline">hydrogen · fuel cell · endurance · real-time telemetry</div>
       </div>
 
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 16px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px' }}>
         <Card style={{ marginBottom: 24 }}>
           <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 800, color: '#111827', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             New Race Session
