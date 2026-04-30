@@ -160,3 +160,82 @@ export function calcStats(laps, session) {
     totalSticks,
   };
 }
+
+// ── Per-pack pace guidance ────────────────────────────────────────────────
+// Calculates pace guidance based on current pack burn rate vs target pack duration
+export function calcPackPaceGuidance({
+  packMahUsed,        // mAh used on current pack (JETI reading, resets to 0 on swap)
+  packElapsedSecs,    // seconds elapsed since pack was installed
+  packCapacityMah,    // capacity of current pack (e.g. 4400 or 5200)
+  targetPackMins,     // target minutes per pack (e.g. 80)
+  maxMahPerMin,       // hard rulebook mAh/min limit
+  totalMahUsed,       // total mAh across all packs
+  totalBudgetMah,     // total race mAh budget (e.g. 14800)
+}) {
+  if (!packMahUsed || !packElapsedSecs || packElapsedSecs < 30) return null;
+
+  const packElapsedMins = packElapsedSecs / 60;
+  const currentBurnRate = packMahUsed / packElapsedMins; // mAh/min on this pack
+
+  // How many mAh/min do we need to last exactly targetPackMins?
+  const targetBurnRate = packCapacityMah / targetPackMins;
+
+  // How long will this pack last at current rate?
+  const projectedPackMins = packCapacityMah / currentBurnRate;
+
+  // Time remaining on this pack at target rate
+  const packTimeRemMins = targetPackMins - packElapsedMins;
+  const packMahRem = packCapacityMah - packMahUsed;
+
+  // Needed burn rate to use remaining mAh in remaining time
+  const neededBurnRate = packTimeRemMins > 0 ? packMahRem / packTimeRemMins : currentBurnRate;
+
+  // Lap time adjustment needed
+  const burnRateDiff = neededBurnRate - currentBurnRate;
+  const lapAdjustSecs = packElapsedMins > 0
+    ? (burnRateDiff / currentBurnRate) * (packElapsedSecs / (packMahUsed / packCapacityMah * targetPackMins || 1))
+    : 0;
+
+  // Total budget check
+  const totalPctUsed = totalBudgetMah > 0 ? (totalMahUsed / totalBudgetMah) * 100 : 0;
+  const overTotalBudget = totalMahUsed > totalBudgetMah;
+
+  // Over hard mAh/min limit
+  const overRateLimit = currentBurnRate > maxMahPerMin;
+
+  // Thresholds — within 8% of target = good
+  const tooFast = currentBurnRate > neededBurnRate * 1.08;
+  const tooSlow = currentBurnRate < neededBurnRate * 0.92;
+
+  let state, title, detail;
+
+  if (overTotalBudget) {
+    state = 'slow_down';
+    title = '⚠ SLOW DOWN — Over total race budget';
+    detail = `Total used: ${Math.round(totalMahUsed)} mAh of ${totalBudgetMah} mAh budget`;
+  } else if (overRateLimit) {
+    state = 'slow_down';
+    title = '⚠ SLOW DOWN — Over mAh/min limit';
+    detail = `Burning ${currentBurnRate.toFixed(1)} mAh/min · limit is ${maxMahPerMin} mAh/min · pack projects ${projectedPackMins.toFixed(0)} min`;
+  } else if (tooFast) {
+    state = 'slow_down';
+    title = '↓ SLOW DOWN';
+    detail = `Pack projects ${projectedPackMins.toFixed(0)} min at current rate · target ${targetPackMins} min · ease off ~${Math.abs(lapAdjustSecs).toFixed(1)}s per lap`;
+  } else if (tooSlow) {
+    state = 'speed_up';
+    title = '↑ SPEED UP — Under-utilizing pack';
+    detail = `Pack projects ${projectedPackMins.toFixed(0)} min · target ${targetPackMins} min · push ~${Math.abs(lapAdjustSecs).toFixed(1)}s faster per lap`;
+  } else {
+    state = 'good';
+    title = '✓ ON TARGET PACE';
+    detail = `Pack on track for ${projectedPackMins.toFixed(0)} min · target ${targetPackMins} min · burn rate ${currentBurnRate.toFixed(1)} mAh/min`;
+  }
+
+  return {
+    state, title, detail,
+    currentBurnRate, neededBurnRate, targetBurnRate,
+    projectedPackMins, packTimeRemMins, packMahRem,
+    totalPctUsed, overTotalBudget, overRateLimit,
+    lapAdjustSecs,
+  };
+}

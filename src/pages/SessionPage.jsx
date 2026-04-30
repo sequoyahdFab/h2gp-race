@@ -8,10 +8,11 @@ export default function SessionPage({ onSelect }) {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
-    name: '', race_duration_mins: 80, battery_limit_mah: 2200,
+    name: '', race_duration_mins: 240, battery_limit_mah: 14800,
     total_sticks: 6, max_mah_per_min: 26.13, target_lap_time: 20,
     fast_threshold: 18, slow_threshold: 23, stick_min_mins: 12,
     stick_max_mins: 16, fc_low_amps: 1.0,
+    target_pack_mins: 80, num_battery_packs: 3,
   });
 
   const f = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
@@ -86,9 +87,14 @@ export default function SessionPage({ onSelect }) {
           </div>
 
           <SectionLabel style={{ marginTop: 0 }}>Race limits</SectionLabel>
+          <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 7, padding: '10px 12px', marginBottom: 10, fontSize: 12, color: '#065F46' }}>
+            <strong>Default setup:</strong> 4-hour race · 3 battery packs (4,400 + 5,200 + 5,200 mAh) · 80 min target per pack · 14,800 mAh total budget
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 4 }}>
             {inp('Race duration (min)', 'race_duration_mins')}
-            {inp('Battery limit (mAh)', 'battery_limit_mah')}
+            {inp('Total mAh budget', 'battery_limit_mah')}
+            {inp('Battery packs', 'num_battery_packs')}
+            {inp('Target mins/pack', 'target_pack_mins')}
             {inp('Total H2 sticks', 'total_sticks')}
             {inp('Max mAh/min', 'max_mah_per_min', { step: 0.1 })}
           </div>
