@@ -1,18 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useLiveRCPoller } from '../hooks/useLiveRC';
 import StrategyDashboard from '../components/StrategyDashboard';
-import { LapTimeEntry, BatteryEntry, FuelCellEntry, VoltageEntry } from '../components/EntryPanels';
+import { LapTimeEntry, CapacityEntry, CurrentEntry, VoltageEntry } from '../components/EntryPanels';
 import { PitStopEntry, BatterySwapEntry } from '../components/EventsPanel';
 import { Btn } from '../components/UI';
 
 const ROLES = [
-  { id: 'strategy',     label: 'Strategy',      emoji: '📊' },
-  { id: 'lap-timer',    label: 'Lap Timer',      emoji: '⏱' },
-  { id: 'battery',      label: 'Battery',        emoji: '🔋' },
-  { id: 'fuel-cell',    label: 'Fuel Cell',      emoji: '⚗️' },
-  { id: 'voltage',      label: 'Voltage',        emoji: '⚡' },
-  { id: 'pit-stop',     label: 'Pit Stops',      emoji: '🔧' },
-  { id: 'battery-swap', label: 'Battery Swap',   emoji: '🔄' },
+  { id: 'strategy',     label: 'Strategy',    emoji: '📊' },
+  { id: 'lap-timer',    label: 'Lap Timer',   emoji: '⏱' },
+  { id: 'capacity',     label: 'Capacity',    emoji: '📊' },
+  { id: 'current',      label: 'Current',     emoji: '⚡' },
+  { id: 'voltage',      label: 'Voltage',     emoji: '🔋' },
+  { id: 'pit-stop',     label: 'Pit Stops',   emoji: '🔧' },
+  { id: 'battery-swap', label: 'Bat Swap',    emoji: '🔄' },
 ];
 
 const POST_RACE_WINDOW_SECS = 300;
@@ -162,8 +162,8 @@ export default function RacePage({
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 24px 48px' }}>
         {role === 'strategy'     && <StrategyDashboard session={session} laps={laps} pitStops={pitStops} batteryPacks={batteryPacks || []} />}
         {role === 'lap-timer'    && <LapTimeEntry {...entryProps} />}
-        {role === 'battery'      && <BatteryEntry {...entryProps} />}
-        {role === 'fuel-cell'    && <FuelCellEntry {...entryProps} />}
+        {role === 'capacity'     && <CapacityEntry {...entryProps} />}
+        {role === 'current'      && <CurrentEntry {...entryProps} />}
         {role === 'voltage'      && <VoltageEntry {...entryProps} />}
         {role === 'pit-stop'     && <PitStopEntry laps={laps} addPitStop={addPitStop} pitStops={pitStops} locked={entryLocked} />}
         {role === 'battery-swap' && <BatterySwapEntry laps={laps} batteryPacks={batteryPacks || []} addBatterySwap={addBatterySwap} locked={entryLocked} />}
