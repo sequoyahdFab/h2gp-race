@@ -68,7 +68,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
     });
   }, [laps, session, pitStops]);
 
-  const { n, batUsed, batRem, batPct, avgLap, mahPerMin, fcPerMin, batTimeRem, estTotalLaps, sticksUsed, advisorState, advisorTitle, advisorDetail, raceMins, totalSticks, fcEMA, fcAvg5, trendDeclining } = stats;
+  const { n, batUsed, batRem, batPct, avgLap, mahPerMin, fcPerMin, batTimeRem, estTotalLaps, sticksUsed, advisorState, advisorTitle, advisorDetail, raceMins, totalSticks, fcEMA, trendDeclining } = stats;
 
   const timePct = session?.race_start_time ? Math.min(100, (elapsed / (raceMins * 60)) * 100) : 0;
   const timeRem = Math.max(0, raceMins * 60 - elapsed);
