@@ -26,7 +26,6 @@ export function Tooltip({ text, children }) {
           lineHeight: 1.5,
           padding: '7px 10px',
           borderRadius: 6,
-          whiteSpace: 'nowrap',
           maxWidth: 240,
           whiteSpace: 'normal',
           zIndex: 100,
