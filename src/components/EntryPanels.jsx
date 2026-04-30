@@ -13,7 +13,7 @@ function Field({ label, id, value, onChange, placeholder, step, onEnter }) {
   );
 }
 
-export function LapTimeEntry({ session, laps, addLap, updateLap }) {
+export function LapTimeEntry({ session, laps, addLap, updateLap, locked }) {
   const [lapTime, setLapTime] = useState('');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
@@ -51,7 +51,7 @@ export function LapTimeEntry({ session, laps, addLap, updateLap }) {
           <Field label="Lap time (seconds)" id="lt" value={lapTime} onChange={setLapTime} placeholder="e.g. 20.34" step="0.01" onEnter={handleSubmit} />
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <Btn onClick={handleSubmit} disabled={saving || !lapTime}>
+          <Btn onClick={handleSubmit} disabled={saving || !lapTime || locked}>
             {saving ? 'Saving…' : `+ Log lap ${pendingLap?.lap_number || nextLap}`}
           </Btn>
           {msg && <span style={{ fontSize: 13, color: '#059669', fontWeight: 500 }}>{msg}</span>}
@@ -69,7 +69,7 @@ export function LapTimeEntry({ session, laps, addLap, updateLap }) {
   );
 }
 
-export function BatteryEntry({ session, laps, addLap, updateLap }) {
+export function BatteryEntry({ session, laps, addLap, updateLap, locked }) {
   const [batCap, setBatCap] = useState('');
   const [batCur, setBatCur] = useState('');
   const [saving, setSaving] = useState(false);
@@ -114,7 +114,7 @@ export function BatteryEntry({ session, laps, addLap, updateLap }) {
           <Field label="Battery current (A)" id="ba" value={batCur} onChange={setBatCur} placeholder="e.g. 3.5" step="0.1" onEnter={handleSubmit} />
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <Btn onClick={handleSubmit} disabled={saving || (!batCap && !batCur)}>{saving ? 'Saving…' : 'Log reading'}</Btn>
+          <Btn onClick={handleSubmit} disabled={saving || (!batCap && !batCur) || locked}>{saving ? 'Saving…' : 'Log reading'}</Btn>
           {msg && <span style={{ fontSize:13, color:'#059669', fontWeight:500 }}>{msg}</span>}
         </div>
       </Card>
@@ -132,7 +132,7 @@ export function BatteryEntry({ session, laps, addLap, updateLap }) {
   );
 }
 
-export function FuelCellEntry({ session, laps, addLap, updateLap }) {
+export function FuelCellEntry({ session, laps, addLap, updateLap, locked }) {
   const [fcCap, setFcCap] = useState('');
   const [fcCur, setFcCur] = useState('');
   const [saving, setSaving] = useState(false);
@@ -178,7 +178,7 @@ export function FuelCellEntry({ session, laps, addLap, updateLap }) {
           <Field label="FC current (A)" id="fa" value={fcCur} onChange={setFcCur} placeholder="e.g. 2.1" step="0.1" onEnter={handleSubmit} />
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <Btn onClick={handleSubmit} disabled={saving || (!fcCap && !fcCur)}>{saving ? 'Saving…' : 'Log reading'}</Btn>
+          <Btn onClick={handleSubmit} disabled={saving || (!fcCap && !fcCur) || locked}>{saving ? 'Saving…' : 'Log reading'}</Btn>
           {msg && <span style={{ fontSize:13, color:'#059669', fontWeight:500 }}>{msg}</span>}
         </div>
       </Card>
@@ -196,7 +196,7 @@ export function FuelCellEntry({ session, laps, addLap, updateLap }) {
   );
 }
 
-export function VoltageEntry({ session, laps, addLap, updateLap }) {
+export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
   const [voltage, setVoltage] = useState('');
   const [stickSwap, setStickSwap] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -242,7 +242,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap }) {
           <span style={{ fontSize:14, fontWeight:600, color: stickSwap ? '#065F46' : '#374151' }}>H2 stick swapped this lap</span>
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          <Btn onClick={handleSubmit} disabled={saving || !voltage} variant={stickSwap ? 'secondary' : 'primary'}>
+          <Btn onClick={handleSubmit} disabled={saving || !voltage || locked} variant={stickSwap ? 'secondary' : 'primary'}>
             {saving ? 'Saving…' : stickSwap ? '🔄 Log + record swap' : 'Log reading'}
           </Btn>
           {msg && <span style={{ fontSize:13, color:'#059669', fontWeight:500 }}>{msg}</span>}

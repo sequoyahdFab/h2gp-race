@@ -70,7 +70,7 @@ export function useRace(sessionId) {
     if (error) throw error;
   }, []);
 
-  // Stamps race_start_time on the session — syncs to all clients instantly via realtime
+  // Stamps race_start_time — syncs to all clients instantly via realtime
   const startRace = useCallback(async () => {
     const { error } = await supabase
       .from('sessions')
@@ -79,7 +79,16 @@ export function useRace(sessionId) {
     if (error) throw error;
   }, [sessionId]);
 
-  return { session, laps, loading, error, addLap, updateLap, startRace, refetch: fetchData };
+  // Stamps race_end_time — entry stays open for 5 min after
+  const endRace = useCallback(async () => {
+    const { error } = await supabase
+      .from('sessions')
+      .update({ race_end_time: new Date().toISOString() })
+      .eq('id', sessionId);
+    if (error) throw error;
+  }, [sessionId]);
+
+  return { session, laps, loading, error, addLap, updateLap, startRace, endRace, refetch: fetchData };
 }
 
 export function useSessions() {

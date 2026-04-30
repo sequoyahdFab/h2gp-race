@@ -12,12 +12,18 @@ export default function StrategyDashboard({ session, laps }) {
   const stats = useMemo(() => calcStats(laps, session), [laps, session]);
 
   useEffect(() => {
+    // If race has ended, freeze timer at final elapsed time
+    if (session?.race_end_time && session?.race_start_time) {
+      const finalElapsed = (new Date(session.race_end_time) - new Date(session.race_start_time)) / 1000;
+      setElapsed(finalElapsed);
+      return;
+    }
     const t = setInterval(() => {
       if (!session?.race_start_time) return;
       setElapsed((Date.now() - new Date(session.race_start_time).getTime()) / 1000);
     }, 500);
     return () => clearInterval(t);
-  }, [session?.race_start_time]);
+  }, [session?.race_start_time, session?.race_end_time]);
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -64,8 +70,14 @@ export default function StrategyDashboard({ session, laps }) {
   return (
     <div>
       <div style={{ marginBottom: 16 }}>
-        <div className="big-timer">{fmtDuration(elapsed)}</div>
-        <div className="timer-rem">{fmtTime(timeRem)} remaining · lap {n}</div>
+        <div className="big-timer" style={ session?.race_end_time ? { color: '#374151' } : {} }>
+          {fmtDuration(elapsed)}
+        </div>
+        <div className="timer-rem">
+          {session?.race_end_time
+            ? `Final time · ${n} laps completed`
+            : `${fmtTime(timeRem)} remaining · lap ${n}`}
+        </div>
       </div>
 
       {alerts.map((a, i) => <Alert key={i} type={a.type}>{a.msg}</Alert>)}
