@@ -2,10 +2,37 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Btn, Card, SectionLabel, Alert, Metric } from './UI';
 import { calcStats } from '../lib/calc';
 
+// ── Sanitize input — replace commas with periods ─────────────────────────
+function sanitizeNumeric(val) {
+  return typeof val === 'string' ? val.replace(/,/g, '.') : val;
+}
+
 // ── Shared fast-entry field ───────────────────────────────────────────────
 function FastField({ label, id, value, onChange, placeholder, step, autoFocus, onEnter }) {
   const ref = useRef(null);
   useEffect(() => { if (autoFocus && ref.current) ref.current.focus(); }, [autoFocus]);
+
+  const handleChange = (e) => {
+    // Replace commas with periods so 13,6 becomes 13.6 automatically
+    const sanitized = e.target.value.replace(/,/g, '.');
+    onChange(sanitized);
+  };
+
+  const handleKeyDown = (e) => {
+    // Block comma key entirely and silently replace with period
+    if (e.key === ',') {
+      e.preventDefault();
+      const el = e.target;
+      const pos = el.selectionStart;
+      const newVal = el.value.slice(0, pos) + '.' + el.value.slice(el.selectionEnd);
+      onChange(newVal);
+      // Restore cursor position after the period
+      setTimeout(() => el.setSelectionRange(pos + 1, pos + 1), 0);
+      return;
+    }
+    if (e.key === 'Enter' && onEnter) onEnter();
+  };
+
   return (
     <div>
       <label htmlFor={id} className="field-label">{label}</label>
@@ -15,9 +42,9 @@ function FastField({ label, id, value, onChange, placeholder, step, autoFocus, o
         type="number"
         step={step || 'any'}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        onKeyDown={e => e.key === 'Enter' && onEnter && onEnter()}
         style={{ fontSize: 20, fontFamily: "'DM Mono', monospace", fontWeight: 500 }}
       />
     </div>
@@ -186,7 +213,7 @@ export function CapacityEntry({ session, laps, addLap, updateLap, locked }) {
           <input
             type="number"
             value={lapNum || currentLap}
-            onChange={e => setLapNum(e.target.value)}
+            onChange={e => setLapNum(sanitizeNumeric(e.target.value))}
             style={{ width: 70, fontSize: 16, fontFamily: "'DM Mono', monospace", fontWeight: 700, textAlign: 'center', padding: '4px 8px' }}
           />
         </div>
@@ -288,7 +315,7 @@ export function CurrentEntry({ session, laps, addLap, updateLap, locked }) {
           <input
             type="number"
             value={lapNum || currentLap}
-            onChange={e => setLapNum(e.target.value)}
+            onChange={e => setLapNum(sanitizeNumeric(e.target.value))}
             style={{ width: 70, fontSize: 16, fontFamily: "'DM Mono', monospace", fontWeight: 700, textAlign: 'center', padding: '4px 8px' }}
           />
         </div>
@@ -375,7 +402,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
           <input
             type="number"
             value={lapNum || currentLap}
-            onChange={e => setLapNum(e.target.value)}
+            onChange={e => setLapNum(sanitizeNumeric(e.target.value))}
             style={{ width: 70, fontSize: 16, fontFamily: "'DM Mono', monospace", fontWeight: 700, textAlign: 'center', padding: '4px 8px' }}
           />
         </div>
