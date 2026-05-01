@@ -13,24 +13,28 @@ function FastField({ label, id, value, onChange, placeholder, step, autoFocus, o
   useEffect(() => { if (autoFocus && ref.current) ref.current.focus(); }, [autoFocus]);
 
   const handleChange = (e) => {
-    // Replace commas with periods so 13,6 becomes 13.6 automatically
+    // Replace commas with periods — handles paste and autocomplete
     const sanitized = e.target.value.replace(/,/g, '.');
     onChange(sanitized);
   };
 
   const handleKeyDown = (e) => {
-    // Block comma key entirely and silently replace with period
+    if (e.key === 'Enter' && onEnter) { onEnter(); return; }
+    // Block comma — the onChange handler will catch pastes,
+    // but blocking the keydown prevents it appearing at all when typed
     if (e.key === ',') {
       e.preventDefault();
+      // Manually insert a period at cursor position in the text value
       const el = e.target;
-      const pos = el.selectionStart;
-      const newVal = el.value.slice(0, pos) + '.' + el.value.slice(el.selectionEnd);
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      const current = el.value;
+      const newVal = current.slice(0, start) + '.' + current.slice(end);
       onChange(newVal);
-      // Restore cursor position after the period
-      setTimeout(() => el.setSelectionRange(pos + 1, pos + 1), 0);
-      return;
+      setTimeout(() => {
+        el.setSelectionRange(start + 1, start + 1);
+      }, 0);
     }
-    if (e.key === 'Enter' && onEnter) onEnter();
   };
 
   return (
@@ -39,8 +43,8 @@ function FastField({ label, id, value, onChange, placeholder, step, autoFocus, o
       <input
         ref={ref}
         id={id}
-        type="number"
-        step={step || 'any'}
+        type="text"
+        inputMode="decimal"
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
