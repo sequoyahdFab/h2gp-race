@@ -1,3 +1,30 @@
+// ── Last known good value — interpolates over missing/skipped laps ────────
+export function lastKnownGood(laps, field, skippedField) {
+  // Walk backwards through laps to find the last non-null, non-skipped value
+  for (let i = laps.length - 1; i >= 0; i--) {
+    const l = laps[i];
+    if (skippedField && l[skippedField]) continue; // explicitly skipped
+    if (l[field] !== null && l[field] !== undefined) return parseFloat(l[field]);
+  }
+  return null;
+}
+
+// ── Interpolated lap array — fills gaps with last known good values ───────
+export function interpolateLaps(laps) {
+  let lastBatCap = null, lastFcCap = null;
+  let lastBatCur = null, lastFcCur = null;
+  let lastVolt = null;
+
+  return laps.map(l => ({
+    ...l,
+    battery_cap_mah_i: l.cap_skipped ? lastBatCap : (l.battery_cap_mah !== null ? (lastBatCap = l.battery_cap_mah) : lastBatCap),
+    fc_cap_mah_i:      l.cap_skipped ? lastFcCap  : (l.fc_cap_mah !== null      ? (lastFcCap  = l.fc_cap_mah)      : lastFcCap),
+    battery_current_i: l.cur_skipped ? lastBatCur : (l.battery_current_a !== null ? (lastBatCur = l.battery_current_a) : lastBatCur),
+    fc_current_i:      l.cur_skipped ? lastFcCur  : (l.fc_current_a !== null     ? (lastFcCur  = l.fc_current_a)      : lastFcCur),
+    voltage_i:         l.volt_skipped? lastVolt   : (l.battery_voltage_v !== null ? (lastVolt   = l.battery_voltage_v) : lastVolt),
+  }));
+}
+
 // Format seconds to M:SS
 export function fmtTime(s) {
   if (s === null || s === undefined || isNaN(s)) return '—';
