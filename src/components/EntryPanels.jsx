@@ -191,17 +191,22 @@ function LapLogRow({ lap, valueStr, status, onFillBack }) {
 }
 
 // ── Shared hook for fill-back logic ───────────────────────────────────────
-function useFillBack(laps, currentLap, missedFn) {
+function useFillBack(laps, currentLap, getStatus) {
   const [fillBackLap, setFillBackLap] = useState(null);
   const activeLap = fillBackLap || currentLap;
-  const missedLaps = laps.slice(0, -1).filter(missedFn);
 
-  // Auto-clear fill-back when that lap is no longer missed
+  // Only include previous laps (not current) that are genuinely missed
+  const missedLaps = laps.length > 1
+    ? laps.slice(0, -1).filter(l => getStatus(l) === 'miss')
+    : [];
+
+  // Auto-clear fill-back if that lap gets filled or skipped
   useEffect(() => {
-    if (fillBackLap && !missedFn(laps.find(l => l.lap_number === fillBackLap) || {})) {
-      setFillBackLap(null);
-    }
-  }, [laps, fillBackLap, missedFn]);
+    if (!fillBackLap) return;
+    const lap = laps.find(l => l.lap_number === fillBackLap);
+    if (!lap || getStatus(lap) !== 'miss') setFillBackLap(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [laps, fillBackLap]);
 
   return { activeLap, fillBackLap, setFillBackLap, missedLaps };
 }
@@ -281,8 +286,8 @@ export function CapacityEntry({ session, laps, addLap, updateLap, locked }) {
   const last = laps[laps.length - 1];
   const batRem = session ? Math.max(0, session.battery_limit_mah - (last?.battery_cap_mah || 0)) : null;
 
-  const isMissed = l => !l.cap_skipped && l.battery_cap_mah === null && l.fc_cap_mah === null;
-  const { activeLap, fillBackLap, setFillBackLap, missedLaps } = useFillBack(laps, currentLap, isMissed);
+  const getCapStatus = l => l.cap_skipped ? 'skip' : (l.battery_cap_mah !== null || l.fc_cap_mah !== null) ? 'ok' : 'miss';
+  const { activeLap, fillBackLap, setFillBackLap, missedLaps } = useFillBack(laps, currentLap, getCapStatus);
 
   const handleSubmit = async () => {
     if ((!batCap && !fcCap) || saving || locked || !activeLap) return;
@@ -313,7 +318,7 @@ export function CapacityEntry({ session, laps, addLap, updateLap, locked }) {
     setFillBackLap(null);
   };
 
-  const lapStatus = l => l.cap_skipped ? 'skip' : (l.battery_cap_mah !== null || l.fc_cap_mah !== null) ? 'ok' : 'miss';
+  const lapStatus = getCapStatus;
 
   return (
     <div>
@@ -376,8 +381,8 @@ export function CurrentEntry({ session, laps, addLap, updateLap, locked }) {
     for (let i = 1; i < fcReadings.length; i++) fcEMA = EMA_ALPHA * fcReadings[i] + (1 - EMA_ALPHA) * fcEMA;
   }
 
-  const isMissed = l => !l.cur_skipped && l.battery_current_a === null && l.fc_current_a === null;
-  const { activeLap, fillBackLap, setFillBackLap, missedLaps } = useFillBack(laps, currentLap, isMissed);
+  const getCurStatus = l => l.cur_skipped ? 'skip' : (l.battery_current_a !== null || l.fc_current_a !== null) ? 'ok' : 'miss';
+  const { activeLap, fillBackLap, setFillBackLap, missedLaps } = useFillBack(laps, currentLap, getCurStatus);
 
   const handleSubmit = async () => {
     if ((!batCur && !fcCur) || saving || locked || !activeLap) return;
@@ -408,7 +413,7 @@ export function CurrentEntry({ session, laps, addLap, updateLap, locked }) {
     setFillBackLap(null);
   };
 
-  const lapStatus = l => l.cur_skipped ? 'skip' : (l.battery_current_a !== null || l.fc_current_a !== null) ? 'ok' : 'miss';
+  const lapStatus = getCurStatus;
 
   return (
     <div>
@@ -464,8 +469,8 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
   const currentLap = laps.length;
   const last = laps[laps.length - 1];
 
-  const isMissed = l => !l.volt_skipped && l.battery_voltage_v === null;
-  const { activeLap, fillBackLap, setFillBackLap, missedLaps } = useFillBack(laps, currentLap, isMissed);
+  const getVoltStatus = l => l.volt_skipped ? 'skip' : l.battery_voltage_v !== null ? 'ok' : 'miss';
+  const { activeLap, fillBackLap, setFillBackLap, missedLaps } = useFillBack(laps, currentLap, getVoltStatus);
 
   const handleSubmit = async () => {
     if (!voltage || saving || locked || !activeLap) return;
@@ -496,7 +501,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
     setFillBackLap(null);
   };
 
-  const lapStatus = l => l.volt_skipped ? 'skip' : l.battery_voltage_v !== null ? 'ok' : 'miss';
+  const lapStatus = getVoltStatus;
 
   return (
     <div>

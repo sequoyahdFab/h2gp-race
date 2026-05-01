@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { Metric, ResourceBar, StickDisplay, StickAdvisor, Alert, SectionLabel, ProjRow, Card } from './UI';
-import { calcStats, fmtTime, fmtDuration, lapSpeed } from '../lib/calc';
+import { calcStats, fmtTime, fmtDuration, lapSpeed, interpolateLaps } from '../lib/calc';
 import { PaceAdvisor } from './PaceAdvisor';
 import { reasonMeta } from '../lib/constants';
 
@@ -11,7 +11,8 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   const [elapsed, setElapsed] = useState(0);
-  const stats = useMemo(() => calcStats(laps, session), [laps, session]);
+  const interpolated = useMemo(() => interpolateLaps(laps), [laps]);
+  const stats = useMemo(() => calcStats(interpolated, session), [interpolated, session]);
 
   useEffect(() => {
     if (session?.race_end_time && session?.race_start_time) {
