@@ -13,9 +13,97 @@ const ROLES = [
   { id: 'voltage',      label: 'Voltage',     emoji: '🔋' },
   { id: 'pit-stop',     label: 'Pit Stops',   emoji: '🔧' },
   { id: 'battery-swap', label: 'Bat Swap',    emoji: '🔄' },
+  { id: 'lap-log',      label: 'Lap Log',     emoji: '📋' },
 ];
 
 const POST_RACE_WINDOW_SECS = 300;
+
+
+// ── Lap Log Tab ───────────────────────────────────────────────────────────
+function LapLogTab({ laps, pitStops }) {
+  const pitLapNums = new Set((pitStops || []).map(p => p.lap_number));
+  const bestTime = laps.reduce((best, l) => {
+    const t = parseFloat(l.lap_time);
+    return !isNaN(t) && t > 0 && t < best ? t : best;
+  }, Infinity);
+
+  const mono = { fontFamily: "'DM Mono', monospace" };
+  const th = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', background: '#F9FAFB', borderBottom: '1.5px solid #E5E7EB', whiteSpace: 'nowrap' };
+  const td = (extra = {}) => ({ padding: '8px 12px', fontSize: 13, borderBottom: '1px solid #F3F4F6', ...mono, ...extra });
+
+  if (!laps.length) return (
+    <div style={{ textAlign: 'center', padding: '60px 0', color: '#9CA3AF', fontSize: 14 }}>
+      No laps recorded yet
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div>
+          <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 700, color: '#111827', letterSpacing: '0.04em' }}>
+            📋 Lap Log
+          </div>
+          <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+            {laps.length} laps recorded · updates live
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: '#fff', border: '1.5px solid #E5E7EB', borderRadius: 10, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={th}>#</th>
+                <th style={th}>Lap Time</th>
+                <th style={th}>Bat Cap (mAh)</th>
+                <th style={th}>FC Cap (mAh)</th>
+                <th style={th}>Bat Current (A)</th>
+                <th style={th}>FC Current (A)</th>
+                <th style={th}>Voltage (V)</th>
+                <th style={th}>Flags</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...laps].reverse().map(l => {
+                const t = parseFloat(l.lap_time);
+                const isBest = !isNaN(t) && t === bestTime;
+                const isPit  = pitLapNums.has(l.lap_number);
+                const rowBg  = isPit ? '#FEF2F2' : isBest ? '#F0FDF4' : '#fff';
+
+                return (
+                  <tr key={l.id} style={{ background: rowBg }}>
+                    <td style={td({ color: '#6B7280', fontWeight: 600 })}>{l.lap_number}</td>
+                    <td style={td({ color: isBest ? '#059669' : '#111827', fontWeight: isBest ? 700 : 400 })}>
+                      {l.lap_time != null ? `${parseFloat(l.lap_time).toFixed(3)}s` : '—'}
+                      {isBest && <span style={{ marginLeft: 5, fontSize: 10, background: '#059669', color: '#fff', borderRadius: 3, padding: '1px 5px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>BEST</span>}
+                    </td>
+                    <td style={td()}>{l.battery_cap_mah != null ? l.battery_cap_mah : '—'}</td>
+                    <td style={td()}>{l.fc_cap_mah != null ? l.fc_cap_mah : '—'}</td>
+                    <td style={td()}>{l.battery_current_a != null ? `${parseFloat(l.battery_current_a).toFixed(1)}` : '—'}</td>
+                    <td style={td()}>{l.fc_current_a != null ? `${parseFloat(l.fc_current_a).toFixed(1)}` : '—'}</td>
+                    <td style={td({
+                      color: l.battery_voltage_v && parseFloat(l.battery_voltage_v) < 7.0 ? '#DC2626' : '#111827',
+                      fontWeight: l.battery_voltage_v && parseFloat(l.battery_voltage_v) < 7.0 ? 700 : 400,
+                    })}>
+                      {l.battery_voltage_v != null ? `${parseFloat(l.battery_voltage_v).toFixed(1)}` : '—'}
+                    </td>
+                    <td style={td({ fontFamily: 'Inter, sans-serif', fontSize: 12 })}>
+                      {l.stick_swap && <span style={{ background: '#DBEAFE', color: '#1D4ED8', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 700, marginRight: 4 }}>H2</span>}
+                      {isPit      && <span style={{ background: '#FEE2E2', color: '#B91C1C', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 700, marginRight: 4 }}>PIT</span>}
+                      {l.source === 'LiveRC' && <span style={{ background: '#F3F4F6', color: '#6B7280', borderRadius: 4, padding: '2px 6px', fontSize: 10, fontWeight: 600 }}>RC</span>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function RacePage({
   session, laps, addLap, updateLap, startRace, endRace,
@@ -167,6 +255,7 @@ export default function RacePage({
         {role === 'voltage'      && <VoltageEntry {...entryProps} />}
         {role === 'pit-stop'     && <PitStopEntry laps={laps} addPitStop={addPitStop} pitStops={pitStops} locked={entryLocked} />}
         {role === 'battery-swap' && <BatterySwapEntry laps={laps} batteryPacks={batteryPacks || []} addBatterySwap={addBatterySwap} locked={entryLocked} />}
+        {role === 'lap-log'      && <LapLogTab laps={laps} pitStops={pitStops} />}
       </div>
     </div>
   );
