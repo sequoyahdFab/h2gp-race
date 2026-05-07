@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from 'react-router-dom';
 import SessionPage from './pages/SessionPage';
 import RacePage from './pages/RacePage';
 import ReviewPage from './pages/ReviewPage';
@@ -6,7 +7,9 @@ import { useRace } from './hooks/useRace';
 import { useRaceEvents } from './hooks/useRaceEvents';
 
 // Wrapper that decides live vs review based on race_end_time
-function RaceRouter({ sessionId, initialRole, onBack }) {
+function RaceRouter({ initialRole }) {
+  const { sessionId } = useParams();
+  const navigate = useNavigate();
   const { session, laps, loading, error, addLap, updateLap, startRace, endRace } = useRace(sessionId);
   const { events, batteryPacks, addPitStop, addBatterySwap } = useRaceEvents(sessionId);
 
@@ -21,7 +24,7 @@ function RaceRouter({ sessionId, initialRole, onBack }) {
 
   // Completed race → Review mode
   if (session?.race_end_time) {
-    return <ReviewPage session={session} laps={laps} events={events} batteryPacks={batteryPacks} onBack={onBack} />;
+    return <ReviewPage session={session} laps={laps} events={events} batteryPacks={batteryPacks} onBack={() => navigate('/')} />;
   }
 
   // Active race → Live dashboard
@@ -38,20 +41,18 @@ function RaceRouter({ sessionId, initialRole, onBack }) {
       addPitStop={addPitStop}
       addBatterySwap={addBatterySwap}
       initialRole={initialRole}
-      onBack={onBack}
+      onBack={() => navigate('/')}
     />
   );
 }
 
-export default function App() {
-  const [view, setView] = useState('sessions');
-  const [sessionId, setSessionId] = useState(null);
+function AppInner() {
   const [initialRole, setInitialRole] = useState('strategy');
+  const navigate = useNavigate();
 
   const handleSelect = (id, role = 'strategy') => {
-    setSessionId(id);
     setInitialRole(role);
-    setView('race');
+    navigate(`/race/${id}`);
   };
 
   return (
@@ -165,15 +166,19 @@ export default function App() {
         .timer-rem { font-family: 'DM Mono', monospace; font-size: 13px; color: #9CA3AF; margin-top: 4px; }
       `}</style>
       <div className="app-wrap">
-        {view === 'sessions' && <SessionPage onSelect={handleSelect} />}
-        {view === 'race' && sessionId && (
-          <RaceRouter
-            sessionId={sessionId}
-            initialRole={initialRole}
-            onBack={() => setView('sessions')}
-          />
-        )}
+        <Routes>
+          <Route path="/" element={<SessionPage onSelect={handleSelect} />} />
+          <Route path="/race/:sessionId" element={<RaceRouter initialRole={initialRole} />} />
+        </Routes>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppInner />
+    </BrowserRouter>
   );
 }
