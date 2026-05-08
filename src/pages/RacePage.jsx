@@ -116,6 +116,7 @@ export default function RacePage({
   const [liveRCEnabled, setLiveRCEnabled] = useState(false);
   const [liveRCStatus, setLiveRCStatus] = useState('');
   const [postRaceSecsLeft, setPostRaceSecsLeft] = useState(null);
+  const [sessionIdCopied, setSessionIdCopied] = useState(false);
 
   useEffect(() => {
     if (!session?.race_end_time) { setPostRaceSecsLeft(null); return; }
@@ -166,6 +167,15 @@ export default function RacePage({
             <div className="race-title">{session.name || 'Race'}</div>
             <div className="race-subtitle">
               {session.race_duration_mins}min · {session.battery_limit_mah}mAh · {session.total_sticks} sticks · {laps.length} laps · {pitStops.length} pit stops
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+              <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Session ID</span>
+              <code style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#6B7280', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 4, padding: '2px 7px' }}>{session.id}</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText(session.id); setSessionIdCopied(true); setTimeout(() => setSessionIdCopied(false), 2000); }}
+                style={{ fontSize: 10, fontWeight: 600, color: sessionIdCopied ? '#059669' : '#6B7280', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px', fontFamily: 'Inter, sans-serif' }}>
+                {sessionIdCopied ? '✓ Copied' : 'Copy'}
+              </button>
             </div>
           </div>
         </div>
