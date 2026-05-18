@@ -122,7 +122,7 @@ export default function SessionPage({ onSelect }) {
                   <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 17, fontWeight: 800, color: isSelected || hoveredPreset === key ? preset.color : '#374151', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                     {preset.label}
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>
                     {preset.subtitle.split(' · ').map((stat, i) => (
                       <span key={i} style={{
                         fontFamily: "'DM Mono', monospace",
@@ -135,6 +135,8 @@ export default function SessionPage({ onSelect }) {
                         border: `1px solid ${isSelected || hoveredPreset === key ? preset.color + '40' : '#E5E7EB'}`,
                         transition: 'all 0.15s',
                         whiteSpace: 'nowrap',
+                        display: 'inline-block',
+                        width: 'fit-content',
                       }}>
                         {stat}
                       </span>
