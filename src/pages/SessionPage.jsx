@@ -122,8 +122,23 @@ export default function SessionPage({ onSelect }) {
                   <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 17, fontWeight: 800, color: isSelected || hoveredPreset === key ? preset.color : '#374151', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                     {preset.label}
                   </div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: isSelected || hoveredPreset === key ? preset.color : '#9CA3AF', marginTop: 3, lineHeight: 1.4 }}>
-                    {preset.subtitle}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                    {preset.subtitle.split(' · ').map((stat, i) => (
+                      <span key={i} style={{
+                        fontFamily: "'DM Mono', monospace",
+                        fontSize: 10,
+                        fontWeight: 500,
+                        padding: '2px 7px',
+                        borderRadius: 4,
+                        background: isSelected || hoveredPreset === key ? `${preset.color}18` : '#F3F4F6',
+                        color: isSelected || hoveredPreset === key ? preset.color : '#6B7280',
+                        border: `1px solid ${isSelected || hoveredPreset === key ? preset.color + '40' : '#E5E7EB'}`,
+                        transition: 'all 0.15s',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {stat}
+                      </span>
+                    ))}
                   </div>
                 </div>
               );
