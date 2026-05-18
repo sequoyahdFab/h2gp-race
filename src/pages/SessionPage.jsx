@@ -10,6 +10,7 @@ export default function SessionPage({ onSelect }) {
   const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState('');
   const [selectedPreset, setSelectedPreset] = useState(null);
+  const [hoveredPreset, setHoveredPreset] = useState(null);
   const [form, setForm] = useState({
     name: '',
     race_duration_mins: 240,
@@ -107,17 +108,21 @@ export default function SessionPage({ onSelect }) {
                 <div
                   key={key}
                   onClick={() => applyPreset(key)}
+                  onMouseEnter={() => setHoveredPreset(key)}
+                  onMouseLeave={() => setHoveredPreset(null)}
                   style={{
                     padding: '12px 14px', borderRadius: 8, cursor: 'pointer',
-                    border: `2px solid ${isSelected ? preset.color : '#E5E7EB'}`,
-                    background: isSelected ? preset.bg : '#F9FAFB',
+                    border: `2px solid ${isSelected || hoveredPreset === key ? preset.color : '#E5E7EB'}`,
+                    background: isSelected || hoveredPreset === key ? preset.bg : '#F9FAFB',
                     transition: 'all 0.15s',
+                    transform: hoveredPreset === key && !isSelected ? 'translateY(-1px)' : 'none',
+                    boxShadow: hoveredPreset === key && !isSelected ? `0 4px 12px ${preset.color}25` : 'none',
                   }}
                 >
-                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 800, color: isSelected ? preset.color : '#374151', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 800, color: isSelected || hoveredPreset === key ? preset.color : '#374151', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                     {preset.label}
                   </div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: isSelected ? preset.color : '#9CA3AF', marginTop: 3, lineHeight: 1.4 }}>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: isSelected || hoveredPreset === key ? preset.color : '#9CA3AF', marginTop: 3, lineHeight: 1.4 }}>
                     {preset.subtitle}
                   </div>
                 </div>
