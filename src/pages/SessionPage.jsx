@@ -86,10 +86,10 @@ export default function SessionPage({ onSelect }) {
     <div>
       <div className="session-hero">
         <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 160, width: 'auto', marginBottom: 14 }} />
-        <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 700, color: '#D1D5DB', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 700, color: '#D1D5DB', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
           Race Control Dashboard
         </div>
-        <div className="session-tagline">hydrogen · fuel cell · endurance · real-time telemetry</div>
+        <div className="session-tagline" style={{ fontSize: 14 }}>hydrogen · fuel cell · endurance · real-time telemetry</div>
       </div>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px' }}>
