@@ -85,8 +85,8 @@ export default function SessionPage({ onSelect }) {
   return (
     <div>
       <div className="session-hero">
-        <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 120, width: 'auto', marginBottom: 12 }} />
-        <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13, fontWeight: 700, color: '#D1D5DB', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+        <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 160, width: 'auto', marginBottom: 14 }} />
+        <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 700, color: '#D1D5DB', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
           Race Control Dashboard
         </div>
         <div className="session-tagline">hydrogen · fuel cell · endurance · real-time telemetry</div>

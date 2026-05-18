@@ -162,7 +162,7 @@ export default function RacePage({
       {/* Header */}
       <div className="race-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 44, width: 'auto' }} />
+          <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 36, width: 'auto' }} />
           <div>
             <div className="race-title">{session.name || 'Race'}</div>
             <div className="race-subtitle">

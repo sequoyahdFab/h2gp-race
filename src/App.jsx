@@ -143,7 +143,7 @@ function AppInner() {
         .proj-value { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: #111827; }
 
         .race-header { background: #000000; border-bottom: 2px solid #1a1a1a; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-        .race-title { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.02em; text-transform: uppercase; }
+        .race-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.02em; text-transform: uppercase; }
         .race-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; margin-top: 2px; }
 
         .session-hero { background: #000000; border-bottom: 2px solid #1a1a1a; padding: 32px 24px 28px; text-align: center; }
