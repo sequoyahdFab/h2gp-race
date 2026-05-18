@@ -95,7 +95,7 @@ export default function SessionPage({ onSelect }) {
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px' }}>
         <Card style={{ marginBottom: 24 }}>
-          <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 800, color: '#111827', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 800, color: '#111827', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             New Race Session
           </div>
 
@@ -119,10 +119,10 @@ export default function SessionPage({ onSelect }) {
                     boxShadow: hoveredPreset === key && !isSelected ? `0 4px 12px ${preset.color}25` : 'none',
                   }}
                 >
-                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 800, color: isSelected || hoveredPreset === key ? preset.color : '#374151', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 17, fontWeight: 800, color: isSelected || hoveredPreset === key ? preset.color : '#374151', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                     {preset.label}
                   </div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: isSelected || hoveredPreset === key ? preset.color : '#9CA3AF', marginTop: 3, lineHeight: 1.4 }}>
+                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: isSelected || hoveredPreset === key ? preset.color : '#9CA3AF', marginTop: 3, lineHeight: 1.4 }}>
                     {preset.subtitle}
                   </div>
                 </div>
@@ -133,19 +133,19 @@ export default function SessionPage({ onSelect }) {
           {/* Pack preview */}
           {activePreset && !activePreset.isPractice && (
             <div style={{ background: activePreset.bg, border: `1px solid ${activePreset.color}30`, borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
-              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: activePreset.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13, fontWeight: 700, color: activePreset.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                 Optimal battery configuration
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {activePreset.packs.map((p, i) => (
-                  <div key={i} style={{ background: '#FFFFFF', border: `1px solid ${activePreset.color}40`, borderRadius: 6, padding: '6px 10px', fontSize: 11 }}>
+                  <div key={i} style={{ background: '#FFFFFF', border: `1px solid ${activePreset.color}40`, borderRadius: 6, padding: '6px 10px', fontSize: 13 }}>
                     <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, color: '#111827', textTransform: 'uppercase' }}>{p.name}</div>
                     <div style={{ fontFamily: "'DM Mono', monospace", color: '#6B7280', marginTop: 1 }}>{p.capacity} mAh</div>
                     <div style={{ fontFamily: "'DM Mono', monospace", color: '#9CA3AF', fontSize: 10 }}>{p.cells}</div>
                   </div>
                 ))}
               </div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: activePreset.color, marginTop: 8 }}>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: activePreset.color, marginTop: 8 }}>
                 Total: {activePreset.packs.reduce((s, p) => s + p.capacity, 0).toLocaleString()} mAh · {activePreset.packs.length} packs · {form.target_pack_mins} min/pack
               </div>
             </div>
@@ -161,7 +161,7 @@ export default function SessionPage({ onSelect }) {
 
           {/* Advanced config — collapsed by default */}
           <details style={{ marginBottom: 16 }}>
-            <summary style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer', userSelect: 'none' }}>
+            <summary style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer', userSelect: 'none' }}>
               Advanced configuration ▾
             </summary>
             <div style={{ marginTop: 12 }}>
@@ -193,7 +193,7 @@ export default function SessionPage({ onSelect }) {
 
           {/* Practice mode note */}
           {activePreset?.isPractice && (
-            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 7, padding: '10px 14px', marginBottom: 14, fontSize: 12, color: '#6B7280', fontFamily: "'Barlow', sans-serif" }}>
+            <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 7, padding: '10px 14px', marginBottom: 14, fontSize: 14, color: '#6B7280', fontFamily: "'Barlow', sans-serif" }}>
               <strong style={{ color: '#374151' }}>Practice mode</strong> — no mAh budget enforcement or race limits. All telemetry and lap data is still logged. Duration and config are fully adjustable in Advanced configuration above.
             </div>
           )}
@@ -203,7 +203,7 @@ export default function SessionPage({ onSelect }) {
             {creating ? 'Creating…' : selectedPreset ? `+ Create ${activePreset.label} Session` : 'Select a race type first'}
           </Btn>
           {!selectedPreset && (
-            <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 8 }}>Select a race type above to continue</div>
+            <div style={{ fontSize: 14, color: '#9CA3AF', marginTop: 8 }}>Select a race type above to continue</div>
           )}
         </Card>
 
@@ -223,15 +223,15 @@ export default function SessionPage({ onSelect }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                       <div className="session-name">{s.name}</div>
                       {preset && (
-                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 10, fontWeight: 700, color: preset.color, background: preset.bg, border: `1px solid ${preset.color}40`, borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, color: preset.color, background: preset.bg, border: `1px solid ${preset.color}40`, borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           {preset.label}
                         </span>
                       )}
                       {isComplete && (
-                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 10, fontWeight: 700, color: '#065F46', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Complete</span>
+                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, color: '#065F46', background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Complete</span>
                       )}
                       {isLive && (
-                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 10, fontWeight: 700, color: '#991B1B', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>● Live</span>
+                        <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, color: '#991B1B', background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 4, padding: '1px 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>● Live</span>
                       )}
                     </div>
                     <div className="session-meta">
@@ -243,7 +243,7 @@ export default function SessionPage({ onSelect }) {
                     <button
                       onClick={e => handleDelete(e, s.id, s.name)}
                       disabled={deletingId === s.id}
-                      style={{ background: 'none', border: '1px solid #FECACA', borderRadius: 5, padding: '4px 8px', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: '#DC2626', fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.04em', opacity: deletingId === s.id ? 0.5 : 1 }}
+                      style={{ background: 'none', border: '1px solid #FECACA', borderRadius: 5, padding: '4px 8px', cursor: 'pointer', fontSize: 13, fontWeight: 700, color: '#DC2626', fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.04em', opacity: deletingId === s.id ? 0.5 : 1 }}
                     >
                       {deletingId === s.id ? '…' : 'Delete'}
                     </button>
