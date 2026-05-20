@@ -90,7 +90,7 @@ export default function SessionPage({ onSelect }) {
         <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 700, color: '#D1D5DB', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
           Race Control Dashboard
         </div>
-        <div className="session-tagline" style={{ fontSize: 14 }}>hydrogen · fuel cell · endurance · real-time telemetry</div>
+        <div className="session-tagline" style={{ fontSize: 14, fontFamily: "'Barlow', sans-serif" }}>hydrogen · fuel cell · endurance · real-time telemetry</div>
       </div>
 
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 24px' }}>
@@ -125,7 +125,7 @@ export default function SessionPage({ onSelect }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 6 }}>
                     {preset.subtitle.split(' · ').map((stat, i) => (
                       <span key={i} style={{
-                        fontFamily: "'DM Mono', monospace",
+                        fontFamily: "'Barlow', sans-serif",
                         fontSize: 10,
                         fontWeight: 500,
                         padding: '2px 7px',
