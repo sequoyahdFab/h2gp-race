@@ -56,6 +56,11 @@ export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
   const prevPacksMah = sortedPacks.slice(0, -1).reduce((s, p) => s + parseFloat(p.capacity_mah || 0), 0);
   const totalMahUsed = prevPacksMah + packMahUsed;
 
+  // Calculate avg lap time on current pack for lap adjustment accuracy
+  const packAvgLapSecs = currentPackLaps.length > 0
+    ? packElapsedSecs / currentPackLaps.length
+    : null;
+
   const guidance = calcPackPaceGuidance({
     packMahUsed,
     packElapsedSecs,
@@ -64,6 +69,7 @@ export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
     maxMahPerMin,
     totalMahUsed,
     totalBudgetMah,
+    avgLapSecs: packAvgLapSecs,
   });
 
   if (!guidance) {
@@ -77,9 +83,9 @@ export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
 
   const {
     state, title, detail,
-    currentBurnRate,
+    currentBurnRate, neededBurnRate,
     projectedPackMins, packTimeRemMins, packMahRem,
-    totalPctUsed,
+    totalPctUsed, lapAdjustSecs, targetLapTimeSecs, avgLapSecs,
   } = guidance;
 
   const advisorClass = {
@@ -95,11 +101,41 @@ export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
     <div>
       <div className={advisorClass}>
         <div className="advisor-title">{title}</div>
-        <div className="advisor-detail">{detail}</div>
+
+        {/* Speed recommendation — target lap time + delta */}
+        {targetLapTimeSecs && state !== 'good' && (
+          <div style={{ display: 'flex', gap: 12, alignItems: 'baseline', margin: '8px 0 4px' }}>
+            <div>
+              <div style={{ fontSize: 10, opacity: 0.7, marginBottom: 1 }}>Target lap</div>
+              <div style={{ fontFamily: "'Barlow', monospace", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>
+                {targetLapTimeSecs.toFixed(1)}s
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, opacity: 0.7, marginBottom: 1 }}>vs current avg</div>
+              <div style={{ fontFamily: "'Barlow', monospace", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>
+                {lapAdjustSecs > 0 ? '+' : ''}{lapAdjustSecs.toFixed(1)}s
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, opacity: 0.7, marginBottom: 1 }}>Needed rate</div>
+              <div style={{ fontFamily: "'Barlow', monospace", fontSize: 22, fontWeight: 700, lineHeight: 1 }}>
+                {neededBurnRate.toFixed(1)} <span style={{ fontSize: 11, fontWeight: 400 }}>mAh/min</span>
+              </div>
+            </div>
+          </div>
+        )}
+        {state === 'good' && (
+          <div style={{ margin: '6px 0 2px', fontFamily: "'Barlow', sans-serif", fontSize: 13, opacity: 0.85 }}>
+            Current avg {avgLapSecs ? avgLapSecs.toFixed(1) : '—'}s · {currentBurnRate.toFixed(1)} mAh/min · target {neededBurnRate.toFixed(1)} mAh/min
+          </div>
+        )}
+
+        <div className="advisor-detail" style={{ marginTop: 4 }}>{detail}</div>
 
         {/* Burn rate bar */}
-        <div style={{ marginTop: 10 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, opacity: 0.75, marginBottom: 3, fontFamily: "'DM Mono', monospace" }}>
+        <div style={{ marginTop: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, opacity: 0.75, marginBottom: 3, fontFamily: "'Barlow', sans-serif" }}>
             <span>Burn rate</span>
             <span>{currentBurnRate.toFixed(1)} mAh/min · limit {maxMahPerMin}</span>
           </div>

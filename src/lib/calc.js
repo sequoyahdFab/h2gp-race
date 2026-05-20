@@ -238,6 +238,7 @@ export function calcPackPaceGuidance({
   maxMahPerMin,       // hard rulebook mAh/min limit
   totalMahUsed,       // total mAh across all packs
   totalBudgetMah,     // total race mAh budget (e.g. 14800)
+  avgLapSecs = null,  // avg lap time on current pack (for lap adjustment accuracy)
 }) {
   if (!packMahUsed || !packElapsedSecs || packElapsedSecs < 30) return null;
 
@@ -258,9 +259,25 @@ export function calcPackPaceGuidance({
   const neededBurnRate = packTimeRemMins > 0 ? packMahRem / packTimeRemMins : currentBurnRate;
 
   // Lap time adjustment needed
-  const burnRateDiff = neededBurnRate - currentBurnRate;
-  const lapAdjustSecs = packElapsedMins > 0
-    ? (burnRateDiff / currentBurnRate) * (packElapsedSecs / (packMahUsed / packCapacityMah * targetPackMins || 1))
+  // Logic: if we need to burn neededBurnRate instead of currentBurnRate,
+  // the ratio of burn rates equals the inverse ratio of lap times
+  // (burn faster = shorter laps, burn slower = longer laps)
+  // lapAdjust = avgLapSecs * (currentBurnRate/neededBurnRate - 1)
+  // We don't have avgLap here so we use packElapsedSecs / lapCount approximation
+  // Caller can pass avgLapSecs for more accuracy; fallback to 20s
+  // Use passed avgLapSecs if available, otherwise estimate from pack elapsed time
+  const _avgLapSecs = avgLapSecs && avgLapSecs > 0
+    ? avgLapSecs
+    : packElapsedSecs > 0
+      ? packElapsedSecs / Math.max(1, Math.round(packElapsedMins / 0.35))
+      : 20;
+  // Target lap time = avgLapSecs * (neededBurnRate / currentBurnRate)
+  // slower laps = higher lap time = lower burn rate
+  const targetLapTimeSecs = currentBurnRate > 0
+    ? _avgLapSecs * (currentBurnRate / neededBurnRate)
+    : null;
+  const lapAdjustSecs = targetLapTimeSecs !== null
+    ? targetLapTimeSecs - _avgLapSecs
     : 0;
 
   // Total budget check
@@ -303,6 +320,6 @@ export function calcPackPaceGuidance({
     currentBurnRate, neededBurnRate, targetBurnRate,
     projectedPackMins, packTimeRemMins, packMahRem,
     totalPctUsed, overTotalBudget, overRateLimit,
-    lapAdjustSecs,
+    lapAdjustSecs, targetLapTimeSecs, avgLapSecs: _avgLapSecs,
   };
 }
