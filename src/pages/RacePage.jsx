@@ -27,7 +27,7 @@ function LapLogTab({ laps, pitStops }) {
     return !isNaN(t) && t > 0 && t < best ? t : best;
   }, Infinity);
 
-  const mono = { fontFamily: "'DM Mono', monospace" };
+  const mono = { fontFamily: "'Barlow', sans-serif" };
   const th = { padding: '9px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', background: '#F9FAFB', borderBottom: '1.5px solid #E5E7EB', whiteSpace: 'nowrap' };
   const td = (extra = {}) => ({ padding: '8px 12px', fontSize: 13, borderBottom: '1px solid #F3F4F6', ...mono, ...extra });
 
@@ -170,7 +170,7 @@ export default function RacePage({
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
               <span style={{ fontSize: 10, color: '#9CA3AF', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Session ID</span>
-              <code style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#6B7280', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 4, padding: '2px 7px' }}>{session.id}</code>
+              <code style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: '#6B7280', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 4, padding: '2px 7px' }}>{session.id}</code>
               <button
                 onClick={() => { navigator.clipboard.writeText(session.id); setSessionIdCopied(true); setTimeout(() => setSessionIdCopied(false), 2000); }}
                 style={{ fontSize: 10, fontWeight: 600, color: sessionIdCopied ? '#059669' : '#6B7280', background: 'transparent', border: 'none', cursor: 'pointer', padding: '2px 4px', fontFamily: 'Inter, sans-serif' }}>
@@ -204,7 +204,7 @@ export default function RacePage({
                 ✓ Race Complete
               </span>
               {postRaceSecsLeft > 0 && (
-                <span style={{ fontSize: 11, fontFamily: "'DM Mono', monospace", color: '#D97706', background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 6, padding: '4px 10px' }}>
+                <span style={{ fontSize: 11, fontFamily: "'Barlow', sans-serif", color: '#D97706', background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 6, padding: '4px 10px' }}>
                   Entry closes in {fmtMSS(postRaceSecsLeft)}
                 </span>
               )}

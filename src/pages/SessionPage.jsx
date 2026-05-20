@@ -157,12 +157,12 @@ export default function SessionPage({ onSelect }) {
                 {activePreset.packs.map((p, i) => (
                   <div key={i} style={{ background: '#FFFFFF', border: `1px solid ${activePreset.color}40`, borderRadius: 6, padding: '6px 10px', fontSize: 13 }}>
                     <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, color: '#111827', textTransform: 'uppercase' }}>{p.name}</div>
-                    <div style={{ fontFamily: "'DM Mono', monospace", color: '#6B7280', marginTop: 1 }}>{p.capacity} mAh</div>
-                    <div style={{ fontFamily: "'DM Mono', monospace", color: '#9CA3AF', fontSize: 10 }}>{p.cells}</div>
+                    <div style={{ fontFamily: "'Barlow', sans-serif", color: '#6B7280', marginTop: 1 }}>{p.capacity} mAh</div>
+                    <div style={{ fontFamily: "'Barlow', sans-serif", color: '#9CA3AF', fontSize: 10 }}>{p.cells}</div>
                   </div>
                 ))}
               </div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: activePreset.color, marginTop: 8 }}>
+              <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 13, color: activePreset.color, marginTop: 8 }}>
                 Total: {activePreset.packs.reduce((s, p) => s + p.capacity, 0).toLocaleString()} mAh · {activePreset.packs.length} packs · {form.target_pack_mins} min/pack
               </div>
             </div>

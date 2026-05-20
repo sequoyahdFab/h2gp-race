@@ -89,7 +89,7 @@ function AppInner() {
         .card { background: #FFFFFF; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 16px; }
         .metric-card { background: #FFFFFF; border: 1.5px solid #E5E7EB; border-radius: 8px; padding: 11px 14px; }
         .metric-label { font-family: 'Barlow', sans-serif; font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-        .metric-value { font-family: 'DM Mono', monospace; font-size: 22px; color: #111827; line-height: 1; font-weight: 500; }
+        .metric-value { font-family: 'Barlow', sans-serif; font-size: 22px; color: #111827; line-height: 1; font-weight: 500; }
         .metric-unit { font-family: 'Barlow', sans-serif; font-size: 10px; color: #9CA3AF; margin-top: 2px; }
         .metric-highlight .metric-value { color: #059669; }
 
@@ -112,7 +112,7 @@ function AppInner() {
         .advisor-now    { background: #FEF2F2; border-color: #DC2626; animation: pulse 1.5s infinite; }
         .advisor-danger { background: #FEF2F2; border-color: #DC2626; }
         .advisor-title  { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; letter-spacing: 0.04em; margin-bottom: 3px; text-transform: uppercase; }
-        .advisor-detail { font-family: 'DM Mono', monospace; font-size: 11px; opacity: 0.8; line-height: 1.5; }
+        .advisor-detail { font-family: 'Barlow', sans-serif; font-size: 11px; opacity: 0.8; line-height: 1.5; }
         .advisor-hold .advisor-title   { color: #065F46; }
         .advisor-soon .advisor-title   { color: #92400E; }
         .advisor-now .advisor-title,
@@ -128,7 +128,7 @@ function AppInner() {
 
         .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
         .data-table th { padding: 7px 9px; text-align: left; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1.5px solid #E5E7EB; background: #F9FAFB; position: sticky; top: 0; }
-        .data-table td { padding: 6px 9px; border-bottom: 1px solid #F3F4F6; color: #374151; font-family: 'DM Mono', monospace; font-size: 11px; }
+        .data-table td { padding: 6px 9px; border-bottom: 1px solid #F3F4F6; color: #374151; font-family: 'Barlow', sans-serif; font-size: 11px; }
         .data-table tr:hover td { background: #F9FAFB; }
         .data-table tr.swap-row td { background: #FFFBEB; }
 
@@ -140,14 +140,14 @@ function AppInner() {
         .proj-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #F3F4F6; }
         .proj-row:last-child { border-bottom: none; }
         .proj-label { font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 500; color: #6B7280; }
-        .proj-value { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: #111827; }
+        .proj-value { font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 500; color: #111827; }
 
         .race-header { background: #000000; border-bottom: 2px solid #1a1a1a; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
         .race-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.02em; text-transform: uppercase; }
-        .race-subtitle { font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+        .race-subtitle { font-family: 'Barlow', sans-serif; font-size: 11px; color: #9CA3AF; margin-top: 2px; }
 
         .session-hero { background: #000000; border-bottom: 2px solid #1a1a1a; padding: 32px 24px 28px; text-align: center; }
-        .session-tagline { font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; margin-top: 8px; letter-spacing: 0.06em; }
+        .session-tagline { font-family: 'Barlow', sans-serif; font-size: 11px; color: #9CA3AF; margin-top: 8px; letter-spacing: 0.06em; }
 
         .session-item { background: #FFFFFF; border: 1.5px solid #E5E7EB; border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; display: flex; justify-content: space-between; align-items: center; }
         .session-item:hover { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.08); }
@@ -155,15 +155,15 @@ function AppInner() {
         .session-item-active { border-left: 4px solid #DC2626; }
         .session-item-new { border-left: 4px solid #D1D5DB; }
         .session-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: #111827; letter-spacing: 0.02em; text-transform: uppercase; }
-        .session-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+        .session-meta { font-family: 'Barlow', sans-serif; font-size: 11px; color: #9CA3AF; margin-top: 3px; }
 
         .field-label { font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 600; color: #374151; display: block; margin-bottom: 5px; }
         .role-header { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1.5px solid #E5E7EB; }
         .role-name { font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 800; color: #111827; letter-spacing: 0.03em; text-transform: uppercase; }
         .role-desc { font-family: 'Barlow', sans-serif; font-size: 13px; color: #6B7280; margin-top: 3px; }
 
-        .big-timer { font-family: 'DM Mono', monospace; font-size: 40px; font-weight: 500; color: #059669; letter-spacing: 0.02em; line-height: 1; }
-        .timer-rem { font-family: 'DM Mono', monospace; font-size: 13px; color: #9CA3AF; margin-top: 4px; }
+        .big-timer { font-family: 'Barlow', sans-serif; font-size: 40px; font-weight: 500; color: #059669; letter-spacing: 0.02em; line-height: 1; }
+        .timer-rem { font-family: 'Barlow', sans-serif; font-size: 13px; color: #9CA3AF; margin-top: 4px; }
       `}</style>
       <div className="app-wrap">
         <Routes>
