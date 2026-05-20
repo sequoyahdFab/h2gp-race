@@ -10,7 +10,10 @@ Chart.register(...registerables);
 export default function StrategyDashboard({ session, laps, pitStops = [], batteryPacks = [] }) {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
+  const mahChartRef = useRef(null);
+  const mahChartInstance = useRef(null);
   const [elapsed, setElapsed] = useState(0);
+  const [mahXAxis, setMahXAxis] = useState('lap'); // 'lap' | 'time'
   const interpolated = useMemo(() => interpolateLaps(laps), [laps]);
   const stats = useMemo(() => calcStats(interpolated, session), [interpolated, session]);
 
@@ -68,6 +71,104 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
       },
     });
   }, [laps, session, pitStops]);
+
+  // ── mAh/min chart ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!mahChartRef.current) return;
+
+    // Build per-lap mAh/min: delta battery_cap_mah / lap_time_mins
+    const validLaps = laps.filter(l =>
+      l.battery_cap_mah != null && parseFloat(l.lap_time) > 0 && parseFloat(l.lap_time) < 300
+    );
+    if (validLaps.length < 2) {
+      if (mahChartInstance.current) { mahChartInstance.current.destroy(); mahChartInstance.current = null; }
+      return;
+    }
+
+    // Calculate cumulative elapsed time per lap (seconds from race start)
+    let cumSecs = 0;
+    const lapData = validLaps.map((l, i) => {
+      const lapSecs = parseFloat(l.lap_time);
+      cumSecs += lapSecs;
+      const prevMah = i === 0 ? 0 : parseFloat(validLaps[i - 1].battery_cap_mah);
+      const deltaMah = parseFloat(l.battery_cap_mah) - prevMah;
+      const mpm = deltaMah > 0 ? parseFloat((deltaMah / (lapSecs / 60)).toFixed(2)) : null;
+      return { lap: l.lap_number, cumSecs, mpm };
+    });
+
+    // Filter out nulls/negatives (battery resets on swap, bad readings)
+    const filtered = lapData.filter(d => d.mpm !== null && d.mpm > 0 && d.mpm < 200);
+
+    const labels = filtered.map(d => mahXAxis === 'lap' ? `L${d.lap}` : fmtDuration(d.cumSecs));
+    const mpmData = filtered.map(d => d.mpm);
+
+    // Trend line — linear regression
+    const n = mpmData.length;
+    const xVals = mpmData.map((_, i) => i);
+    const sumX = xVals.reduce((a, b) => a + b, 0);
+    const sumY = mpmData.reduce((a, b) => a + b, 0);
+    const sumXY = xVals.reduce((s, x, i) => s + x * mpmData[i], 0);
+    const sumX2 = xVals.reduce((s, x) => s + x * x, 0);
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    const trendData = xVals.map(x => parseFloat((slope * x + intercept).toFixed(2)));
+
+    const maxLimit = session?.max_mah_per_min && session.max_mah_per_min < 200
+      ? labels.map(() => parseFloat(session.max_mah_per_min))
+      : null;
+
+    const datasets = [
+      {
+        label: 'mAh/min', data: mpmData,
+        borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.07)',
+        tension: 0.3, fill: true, pointRadius: 2, pointBackgroundColor: '#3B82F6',
+      },
+      {
+        label: 'Trend', data: trendData,
+        borderColor: '#9333EA', borderDash: [5, 3], pointRadius: 0, tension: 0,
+      },
+    ];
+    if (maxLimit) {
+      datasets.push({
+        label: 'Max limit', data: maxLimit,
+        borderColor: '#DC2626', borderDash: [4, 3], pointRadius: 0, tension: 0, borderWidth: 1.5,
+      });
+    }
+
+    if (mahChartInstance.current) {
+      mahChartInstance.current.data.labels = labels;
+      mahChartInstance.current.data.datasets = datasets;
+      mahChartInstance.current.update('none');
+      return;
+    }
+
+    mahChartInstance.current = new Chart(mahChartRef.current, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { font: { size: 10 }, color: '#6B7280', boxWidth: 20, padding: 10 },
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y} mAh/min`,
+            },
+          },
+        },
+        scales: {
+          x: { ticks: { font: { size: 10 }, color: '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: '#F3F4F6' } },
+          y: {
+            ticks: { font: { size: 10 }, color: '#9CA3AF', callback: v => `${v}` },
+            grid: { color: '#F3F4F6' },
+            title: { display: true, text: 'mAh/min', font: { size: 10 }, color: '#9CA3AF' },
+          },
+        },
+      },
+    });
+  }, [laps, session, mahXAxis]);
 
   const { n, batUsed, batRem, batPct, avgLap, mahPerMin, fcPerMin, batTimeRem, estTotalLaps, sticksUsed, advisorState, advisorTitle, advisorDetail, raceMins, totalSticks, fcEMA, trendDeclining } = stats;
 
@@ -151,6 +252,36 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
       </div>
       <div style={{ height: 150, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10, marginBottom: 16 }}>
         <canvas ref={chartRef} role="img" aria-label="Lap time chart" />
+      </div>
+
+      {/* mAh/min chart */}
+      <SectionLabel>Battery drain rate (mAh/min)</SectionLabel>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: "'Barlow', sans-serif" }}>
+          <span style={{ color: '#3B82F6', fontWeight: 700 }}>—</span> mAh/min &nbsp;·&nbsp;
+          <span style={{ color: '#9333EA', fontWeight: 700 }}>- -</span> Trend &nbsp;·&nbsp;
+          <span style={{ color: '#DC2626', fontWeight: 700 }}>- -</span> Max limit
+        </div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {['lap', 'time'].map(axis => (
+            <button
+              key={axis}
+              onClick={() => setMahXAxis(axis)}
+              style={{
+                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700,
+                padding: '3px 10px', borderRadius: 5, cursor: 'pointer', textTransform: 'uppercase',
+                border: `1.5px solid ${mahXAxis === axis ? '#3B82F6' : '#D1D5DB'}`,
+                background: mahXAxis === axis ? '#EFF6FF' : '#FFFFFF',
+                color: mahXAxis === axis ? '#1D4ED8' : '#6B7280',
+              }}
+            >
+              {axis === 'lap' ? 'By lap' : 'By time'}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div style={{ height: 160, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10, marginBottom: 16 }}>
+        <canvas ref={mahChartRef} role="img" aria-label="mAh per minute chart" />
       </div>
 
       {/* Recent laps */}
