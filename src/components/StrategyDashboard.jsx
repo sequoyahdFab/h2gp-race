@@ -190,101 +190,126 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
   if (isPractice && n > 0) alerts.push({ type: 'info', msg: 'Practice session — no budget limits enforced' });
 
   return (
-    <div>
-      {/* Timer */}
-      <div style={{ marginBottom: 16 }}>
-        <div className="big-timer" style={session?.race_end_time ? { color: '#374151' } : {}}>
-          {fmtDuration(elapsed)}
-        </div>
-        <div className="timer-rem">
-          {session?.race_end_time ? `Final time · ${n} laps completed` : `${fmtTime(timeRem)} remaining · lap ${n}`}
-        </div>
-      </div>
+    <div style={{ maxWidth: '100%' }}>
 
+      {/* Alerts — full width */}
       {alerts.map((a, i) => <Alert key={i} type={a.type}>{a.msg}</Alert>)}
       {alerts.length === 0 && n > 0 && <Alert type="ok">All systems nominal</Alert>}
 
-      {/* Pace advisor */}
-      {!session?.race_end_time && (
-        <>
-          <SectionLabel>Pace guidance</SectionLabel>
-          <PaceAdvisor session={session} laps={laps} elapsed={elapsed} />
-        </>
-      )}
+      {/* Two-column above-the-fold layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.6fr)', gap: 16, marginBottom: 20, alignItems: 'start' }}>
 
-      {/* Key metrics */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(105px, 1fr))', gap: 8, marginBottom: 16 }}>
-        <Metric label="Avg lap" value={avgLap ? avgLap.toFixed(1) : '—'} unit="sec" />
-        <Metric label="Bat used" value={Math.round(batUsed)} unit="mAh" />
-        <Metric label="Bat remain" value={Math.round(batRem)} unit="mAh" />
-        <Metric label="mAh/min" value={mahPerMin ? mahPerMin.toFixed(1) : '—'} />
-        <Metric label="FC EMA-7" value={fcEMA ? fcEMA.toFixed(2) : last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit={trendDeclining ? 'A ↓ declining' : 'A'} />
-        <Metric label="Voltage" value={last?.battery_voltage_v ? parseFloat(last.battery_voltage_v).toFixed(1) : '—'} unit="V" />
-      </div>
+        {/* LEFT — decisions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
-      {/* Resources */}
-      <SectionLabel>Resources</SectionLabel>
-      <ResourceBar label="Battery" pct={batPct} valueLabel={`${Math.round(batPct)}%`} />
-      <ResourceBar label="Race time" pct={timePct} color="#D97706" valueLabel={`${Math.round(timePct)}%`} />
-      <ResourceBar label="H2 sticks" pct={totalSticks > 0 ? ((totalSticks - sticksUsed) / totalSticks) * 100 : 0} color="#3B82F6" valueLabel={`${totalSticks - sticksUsed} left`} />
+          {/* Timer */}
+          <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px' }}>
+            <div className="big-timer" style={session?.race_end_time ? { color: '#374151' } : {}}>
+              {fmtDuration(elapsed)}
+            </div>
+            <div className="timer-rem">
+              {session?.race_end_time ? `Final time · ${n} laps completed` : `${fmtTime(timeRem)} remaining · lap ${n}`}
+            </div>
+          </div>
 
-      {/* Stick advisor */}
-      <SectionLabel>H2 Stick Advisor</SectionLabel>
-      <StickAdvisor state={advisorState} title={advisorTitle} detail={advisorDetail} />
-      <StickDisplay total={totalSticks} used={sticksUsed} />
+          {/* Pace advisor */}
+          {!session?.race_end_time && (
+            <div>
+              <SectionLabel>Pace guidance</SectionLabel>
+              <PaceAdvisor session={session} laps={laps} elapsed={elapsed} />
+            </div>
+          )}
 
-      {/* Projections */}
-      <Card style={{ marginBottom: 16 }}>
-        <SectionLabel style={{ marginTop: 0 }}>Projections</SectionLabel>
-        <ProjRow label="Est. total laps at current pace" value={estTotalLaps ? `${estTotalLaps} laps` : '—'} />
-        <ProjRow label="Battery runs out in" value={batTimeRem ? fmtTime(batTimeRem * 60) : '—'} />
-        <ProjRow label="Avg drain rate" value={mahPerMin ? `${mahPerMin.toFixed(1)} mAh/min` : '—'} />
-        <ProjRow label="FC avg mAh/min" value={fcPerMin ? `${fcPerMin.toFixed(1)} mAh/min` : '—'} />
-        <ProjRow label="FC cumulative" value={last?.fc_cap_mah ? `${Math.round(last.fc_cap_mah)} mAh` : '—'} />
-        <ProjRow label="Pit stops" value={pitStops.length > 0 ? `${pitStops.length} logged` : '0'} />
-        <ProjRow label="Battery packs" value={batteryPacks.length > 0 ? batteryPacks.map(p => p.pack_name).join(', ') : '—'} />
-      </Card>
+          {/* H2 Stick advisor */}
+          <div>
+            <SectionLabel>H2 Stick Advisor</SectionLabel>
+            <StickAdvisor state={advisorState} title={advisorTitle} detail={advisorDetail} />
+            <StickDisplay total={totalSticks} used={sticksUsed} />
+          </div>
 
-      {/* Lap chart */}
-      <SectionLabel>Lap times</SectionLabel>
-      <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
-        🔴 Pit stop &nbsp;·&nbsp; 🟠 H2 stick swap &nbsp;·&nbsp; — — Target pace
-      </div>
-      <div style={{ height: 150, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10, marginBottom: 16 }}>
-        <canvas ref={chartRef} role="img" aria-label="Lap time chart" />
-      </div>
-
-      {/* mAh/min chart */}
-      <SectionLabel>Battery drain rate (mAh/min)</SectionLabel>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: "'Barlow', sans-serif" }}>
-          <span style={{ color: '#3B82F6', fontWeight: 700 }}>—</span> mAh/min &nbsp;·&nbsp;
-          <span style={{ color: '#9333EA', fontWeight: 700 }}>- -</span> Trend &nbsp;·&nbsp;
-          <span style={{ color: '#DC2626', fontWeight: 700 }}>- -</span> Max limit
+          {/* Resources */}
+          <div>
+            <SectionLabel>Resources</SectionLabel>
+            <ResourceBar label="Battery" pct={batPct} valueLabel={`${Math.round(batPct)}%`} />
+            <ResourceBar label="Race time" pct={timePct} color="#D97706" valueLabel={`${Math.round(timePct)}%`} />
+            <ResourceBar label="H2 sticks" pct={totalSticks > 0 ? ((totalSticks - sticksUsed) / totalSticks) * 100 : 0} color="#3B82F6" valueLabel={`${totalSticks - sticksUsed} left`} />
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {['lap', 'time'].map(axis => (
-            <button
-              key={axis}
-              onClick={() => setMahXAxis(axis)}
-              style={{
-                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700,
-                padding: '3px 10px', borderRadius: 5, cursor: 'pointer', textTransform: 'uppercase',
-                border: `1.5px solid ${mahXAxis === axis ? '#3B82F6' : '#D1D5DB'}`,
-                background: mahXAxis === axis ? '#EFF6FF' : '#FFFFFF',
-                color: mahXAxis === axis ? '#1D4ED8' : '#6B7280',
-              }}
-            >
-              {axis === 'lap' ? 'By lap' : 'By time'}
-            </button>
-          ))}
+
+        {/* RIGHT — data + charts */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+          {/* Key metrics */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+            <Metric label="Avg lap" value={avgLap ? avgLap.toFixed(1) : '—'} unit="sec" />
+            <Metric label="mAh/min" value={mahPerMin ? mahPerMin.toFixed(1) : '—'} />
+            <Metric label="Bat remain" value={Math.round(batRem)} unit="mAh" />
+            <Metric label="Bat used" value={Math.round(batUsed)} unit="mAh" />
+            <Metric label="FC EMA-7" value={fcEMA ? fcEMA.toFixed(2) : last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit={trendDeclining ? 'A ↓ declining' : 'A'} />
+            <Metric label="Voltage" value={last?.battery_voltage_v ? parseFloat(last.battery_voltage_v).toFixed(1) : '—'} unit="V" />
+          </div>
+
+          {/* Lap time chart */}
+          <div>
+            <SectionLabel>Lap times</SectionLabel>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
+              🔴 Pit stop &nbsp;·&nbsp; 🟠 H2 swap &nbsp;·&nbsp; — — Target
+            </div>
+            <div style={{ height: 130, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10 }}>
+              <canvas ref={chartRef} role="img" aria-label="Lap time chart" />
+            </div>
+          </div>
+
+          {/* mAh/min chart */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <SectionLabel style={{ margin: 0 }}>Drain rate (mAh/min)</SectionLabel>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {['lap', 'time'].map(axis => (
+                  <button
+                    key={axis}
+                    onClick={() => setMahXAxis(axis)}
+                    style={{
+                      fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700,
+                      padding: '3px 10px', borderRadius: 5, cursor: 'pointer', textTransform: 'uppercase',
+                      border: `1.5px solid ${mahXAxis === axis ? '#3B82F6' : '#D1D5DB'}`,
+                      background: mahXAxis === axis ? '#EFF6FF' : '#FFFFFF',
+                      color: mahXAxis === axis ? '#1D4ED8' : '#6B7280',
+                    }}
+                  >
+                    {axis === 'lap' ? 'By lap' : 'By time'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
+              <span style={{ color: '#3B82F6', fontWeight: 700 }}>—</span> mAh/min &nbsp;·&nbsp;
+              <span style={{ color: '#9333EA', fontWeight: 700 }}>- -</span> Trend &nbsp;·&nbsp;
+              <span style={{ color: '#DC2626', fontWeight: 700 }}>- -</span> Limit
+            </div>
+            <div style={{ height: 130, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10 }}>
+              <canvas ref={mahChartRef} role="img" aria-label="mAh per minute chart" />
+            </div>
+          </div>
         </div>
       </div>
-      <div style={{ height: 160, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10, marginBottom: 16 }}>
-        <canvas ref={mahChartRef} role="img" aria-label="mAh per minute chart" />
-      </div>
 
-      {/* Recent laps */}
+      {/* BELOW FOLD — projections + recent laps side by side */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 16, borderTop: '1.5px solid #E5E7EB', paddingTop: 16 }}>
+        <Card style={{ marginBottom: 0 }}>
+          <SectionLabel style={{ marginTop: 0 }}>Projections</SectionLabel>
+          <ProjRow label="Est. total laps" value={estTotalLaps ? `${estTotalLaps} laps` : '—'} />
+          <ProjRow label="Battery runs out in" value={batTimeRem ? fmtTime(batTimeRem * 60) : '—'} />
+          <ProjRow label="Avg drain rate" value={mahPerMin ? `${mahPerMin.toFixed(1)} mAh/min` : '—'} />
+          <ProjRow label="FC avg mAh/min" value={fcPerMin ? `${fcPerMin.toFixed(1)} mAh/min` : '—'} />
+          <ProjRow label="FC cumulative" value={last?.fc_cap_mah ? `${Math.round(last.fc_cap_mah)} mAh` : '—'} />
+          <ProjRow label="Pit stops" value={pitStops.length > 0 ? `${pitStops.length} logged` : '0'} />
+          <ProjRow label="Battery packs" value={batteryPacks.length > 0 ? batteryPacks.map(p => p.pack_name).join(', ') : '—'} />
+        </Card>
+
+        {/* Recent laps */}
+        <div>
+          <SectionLabel>Recent laps</SectionLabel>
       <SectionLabel>Recent laps</SectionLabel>
       <div style={{ overflowX: 'auto', border: '1.5px solid #E5E7EB', borderRadius: 8, maxHeight: 360, overflowY: 'auto' }}>
         <table className="data-table" style={{ minWidth: 500 }}>
@@ -325,6 +350,8 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
             {laps.length === 0 && <tr><td colSpan={9} style={{ textAlign: 'center', padding: 20, color: '#9CA3AF' }}>No laps logged yet</td></tr>}
           </tbody>
         </table>
+      </div>
+        </div>
       </div>
     </div>
   );
