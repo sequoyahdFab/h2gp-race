@@ -27,12 +27,29 @@ export default function SessionPage({ onSelect }) {
     num_battery_packs: 3,
   });
 
-  const f = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
+  const f = (k, v) => setForm(prev => {
+    const updated = { ...prev, [k]: v };
+    if (['battery_limit_mah', 'num_battery_packs', 'target_pack_mins'].includes(k)) {
+      const cap   = k === 'battery_limit_mah'   ? v : prev.battery_limit_mah;
+      const packs = k === 'num_battery_packs'   ? v : prev.num_battery_packs;
+      const mins  = k === 'target_pack_mins'    ? v : prev.target_pack_mins;
+      if (cap > 0 && packs > 0 && mins > 0) {
+        updated.max_mah_per_min = parseFloat((cap / packs / mins).toFixed(2));
+      }
+    }
+    return updated;
+  });
 
   const applyPreset = (key) => {
     const preset = RACE_PRESETS[key];
     setSelectedPreset(key);
-    setForm(prev => ({ ...prev, ...preset.config }));
+    setForm(prev => {
+      const merged = { ...prev, ...preset.config };
+      if (merged.battery_limit_mah > 0 && merged.num_battery_packs > 0 && merged.target_pack_mins > 0) {
+        merged.max_mah_per_min = parseFloat((merged.battery_limit_mah / merged.num_battery_packs / merged.target_pack_mins).toFixed(2));
+      }
+      return merged;
+    });
   };
 
   const handleCreate = async () => {
@@ -64,7 +81,7 @@ export default function SessionPage({ onSelect }) {
     num_battery_packs: 'How many battery packs you will use during the race. Each pack is 2 cells.',
     target_pack_mins: 'How long each battery pack should last. Race duration ÷ number of packs. E.g. 240min ÷ 3 packs = 80 min.',
     total_sticks: 'Total number of hydrogen sticks allowed for the race. Regional = 10, States = 18, Worlds = 22.',
-    max_mah_per_min: 'Maximum battery drain rate allowed. The pace advisor warns if you exceed this. Default 26.13 mAh/min.',
+    max_mah_per_min: 'Max battery drain rate per pack (mAh/min). Auto-calculated as: total mAh budget ÷ number of packs ÷ target mins per pack. The pace advisor warns if you exceed this.',
     target_lap_time: 'The ideal lap time in seconds your driver is aiming for. Used to classify laps as Good/Fast/Slow.',
     fast_threshold: 'Lap times below this (in seconds) are flagged as Too Fast — burning battery too quickly.',
     slow_threshold: 'Lap times above this (in seconds) are flagged as Too Slow — under-utilizing battery.',
