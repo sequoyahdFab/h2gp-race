@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { useLiveRCPoller } from '../hooks/useLiveRC';
+import React, { useState, useEffect } from 'react';
 import StrategyDashboard from '../components/StrategyDashboard';
 import { LapTimeEntry, CapacityEntry, CurrentEntry, VoltageEntry } from '../components/EntryPanels';
 import { PitStopEntry, BatterySwapEntry } from '../components/EventsPanel';
@@ -111,10 +110,6 @@ export default function RacePage({
   initialRole = 'strategy', onBack
 }) {
   const [role, setRole] = useState(initialRole);
-  const [showLiveRC, setShowLiveRC] = useState(false);
-  const [liveRCUrl, setLiveRCUrl] = useState('');
-  const [liveRCEnabled, setLiveRCEnabled] = useState(false);
-  const [liveRCStatus, setLiveRCStatus] = useState('');
   const [postRaceSecsLeft, setPostRaceSecsLeft] = useState(null);
   const [sessionIdCopied, setSessionIdCopied] = useState(false);
 
@@ -128,15 +123,6 @@ export default function RacePage({
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, [session?.race_end_time]);
-
-  const handleNewLiveLap = useCallback(async (lapTime) => {
-    try {
-      await addLap({ lap_time: lapTime, source: 'LiveRC', entered_by: 'liverc' });
-      setLiveRCStatus(`Imported lap — ${lapTime}s`);
-    } catch { setLiveRCStatus('Import error'); }
-  }, [addLap]);
-
-  useLiveRCPoller({ url: liveRCUrl, enabled: liveRCEnabled, onNewLap: handleNewLiveLap });
 
   const exportCSV = () => {
     const header = 'lap_number,lap_time,battery_cap_mah,fc_cap_mah,battery_current_a,fc_current_a,battery_voltage_v,stick_swap,source\n';
@@ -215,28 +201,10 @@ export default function RacePage({
               )}
             </div>
           )}
-          <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px', color: liveRCEnabled ? '#1fc98a' : undefined }} onClick={() => setShowLiveRC(!showLiveRC)}>
-            LiveRC {liveRCEnabled ? '● live' : 'off'}
-          </button>
           <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px' }} onClick={exportCSV}>Export CSV</button>
           <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px' }} onClick={onBack}>← Sessions</button>
         </div>
       </div>
-
-      {/* LiveRC panel */}
-      {showLiveRC && (
-        <div style={{ background: '#F9FAFB', borderBottom: '1.5px solid #E5E7EB', padding: '12px 16px' }}>
-          <div style={{ maxWidth: 700, margin: '0 auto' }}>
-            <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 8 }}>Paste your LiveRC live results URL — lap times auto-import every 5 seconds</div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-              <input type="text" value={liveRCUrl} onChange={e => setLiveRCUrl(e.target.value)} placeholder="https://yourtrack.liverc.com/results/?p=view_race_result&id=..." style={{ flex: 1, minWidth: 200, fontSize: 12 }} />
-              <Btn onClick={() => setLiveRCEnabled(true)} disabled={!liveRCUrl || liveRCEnabled}>Start</Btn>
-              <Btn variant="ghost" onClick={() => { setLiveRCEnabled(false); setLiveRCStatus('Stopped'); }}>Stop</Btn>
-              {liveRCStatus && <span style={{ fontSize: 12, color: '#6B7280' }}>{liveRCStatus}</span>}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Locked banner */}
       {entryLocked && (
