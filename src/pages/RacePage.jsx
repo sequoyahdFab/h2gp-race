@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import StrategyDashboard from '../components/StrategyDashboard';
 import { LapTimeEntry, CapacityEntry, CurrentEntry, VoltageEntry } from '../components/EntryPanels';
 import { PitStopEntry, BatterySwapEntry } from '../components/EventsPanel';
-import { Btn } from '../components/UI';
 
 const ROLES = [
   { id: 'strategy',     label: 'Strategy',    emoji: '📊' },
