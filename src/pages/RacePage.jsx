@@ -150,10 +150,12 @@ export default function RacePage({
           <img src="/h2gplogo.png" alt="Sequoyah Racing" style={{ height: 36, width: 'auto' }} />
           <div>
             <div className="race-title">{session.name || 'Race'}</div>
-            <div className="race-subtitle" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-              <span>{session.race_duration_mins}min · {session.battery_limit_mah}mAh · {session.total_sticks} sticks · {laps.length} laps · {pitStops.length} pit stops</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 3 }}>
+              <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 600, color: '#D1D5DB', letterSpacing: '0.02em' }}>
+                {session.race_duration_mins}min · {session.battery_limit_mah?.toLocaleString()}mAh · {session.total_sticks} sticks · {laps.length} laps · {pitStops.length} pit stops
+              </span>
               {session.preset_key === 'practice' && (
-                <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 10, fontWeight: 700, color: '#6B7280', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 4, padding: '1px 7px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, color: '#FCD34D', background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', borderRadius: 4, padding: '2px 8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Practice · no limits
                 </span>
               )}
