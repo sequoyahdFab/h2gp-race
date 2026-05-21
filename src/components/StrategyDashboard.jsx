@@ -187,7 +187,6 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
     if (sticksUsed >= totalSticks) alerts.push({ type: 'danger', msg: 'All H2 sticks depleted' });
     else if (sticksUsed === totalSticks - 1) alerts.push({ type: 'warn', msg: 'Last H2 stick in use' });
   }
-  if (isPractice && n > 0) alerts.push({ type: 'info', msg: 'Practice session — no budget limits enforced' });
 
   return (
     <div style={{ maxWidth: '100%' }}>
