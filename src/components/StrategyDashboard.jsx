@@ -240,12 +240,18 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
 
           {/* Key metrics */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-            <Metric label="Avg lap" value={avgLap ? avgLap.toFixed(1) : '—'} unit="sec" />
-            <Metric label="mAh/min" value={mahPerMin ? mahPerMin.toFixed(1) : '—'} />
-            <Metric label="Bat remain" value={Math.round(batRem)} unit="mAh" />
-            <Metric label="Bat used" value={Math.round(batUsed)} unit="mAh" />
-            <Metric label="FC EMA-7" value={fcEMA ? fcEMA.toFixed(2) : last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit={trendDeclining ? 'A ↓ declining' : 'A'} />
-            <Metric label="Voltage" value={last?.battery_voltage_v ? parseFloat(last.battery_voltage_v).toFixed(1) : '—'} unit="V" />
+            <Metric label="Avg lap" value={avgLap ? avgLap.toFixed(1) : '—'} unit="sec"
+              hint={session?.target_lap_time ? `target: ${session.target_lap_time}s` : undefined} />
+            <Metric label="mAh/min" value={mahPerMin ? mahPerMin.toFixed(1) : '—'}
+              hint={session?.max_mah_per_min ? `max: ${session.max_mah_per_min} mAh/min` : undefined} />
+            <Metric label="Bat remain" value={Math.round(batRem)} unit="mAh"
+              hint={session?.battery_limit_mah ? `limit: ${session.battery_limit_mah.toLocaleString()} mAh` : undefined} />
+            <Metric label="Bat used" value={Math.round(batUsed)} unit="mAh"
+              hint={session?.battery_limit_mah ? `limit: ${session.battery_limit_mah.toLocaleString()} mAh` : undefined} />
+            <Metric label="FC EMA-7" value={fcEMA ? fcEMA.toFixed(2) : last?.fc_current_a ? parseFloat(last.fc_current_a).toFixed(1) : '—'} unit={trendDeclining ? 'A ↓ declining' : 'A'}
+              hint="7-lap exponential avg" />
+            <Metric label="Voltage" value={last?.battery_voltage_v ? parseFloat(last.battery_voltage_v).toFixed(1) : '—'} unit="V"
+              hint="min: 7.0V" />
           </div>
 
           {/* Lap time chart */}

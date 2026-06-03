@@ -1,12 +1,28 @@
 import React from 'react';
 
 
-export function Metric({ label, value, unit, highlight }) {
+export function Metric({ label, value, unit, highlight, hint }) {
   return (
-    <div className={`metric-card${highlight ? ' metric-highlight' : ''}`}>
-      <div className="metric-label">{label}</div>
-      <div className="metric-value">{value ?? '—'}</div>
-      {unit && <div className="metric-unit">{unit}</div>}
+    <div className={`metric-card${highlight ? ' metric-highlight' : ''}`} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+      <div>
+        <div className="metric-label">{label}</div>
+        <div className="metric-value">{value ?? '—'}</div>
+        {unit && <div className="metric-unit">{unit}</div>}
+      </div>
+      {hint && (
+        <div style={{
+          marginTop: 8,
+          paddingTop: 6,
+          borderTop: '1px solid #F3F4F6',
+          fontSize: 10,
+          color: '#9CA3AF',
+          fontFamily: "'Barlow', sans-serif",
+          fontWeight: 500,
+          letterSpacing: '0.02em',
+        }}>
+          {hint}
+        </div>
+      )}
     </div>
   );
 }
