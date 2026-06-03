@@ -7,8 +7,9 @@ export function useRace(sessionId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isInitial = false) => {
     if (!sessionId) return;
+    if (isInitial) setLoading(true);
     try {
       const [{ data: sess, error: sessErr }, { data: lapData, error: lapErr }] =
         await Promise.all([
@@ -22,11 +23,11 @@ export function useRace(sessionId) {
     } catch (e) {
       setError(e.message);
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   }, [sessionId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { fetchData(true); }, [fetchData]);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -70,7 +71,6 @@ export function useRace(sessionId) {
     if (error) throw error;
   }, []);
 
-  // Stamps race_start_time — syncs to all clients instantly via realtime
   const startRace = useCallback(async () => {
     const { error } = await supabase
       .from('sessions')
@@ -79,7 +79,6 @@ export function useRace(sessionId) {
     if (error) throw error;
   }, [sessionId]);
 
-  // Stamps race_end_time — entry stays open for 5 min after
   const endRace = useCallback(async () => {
     const { error } = await supabase
       .from('sessions')
