@@ -113,20 +113,26 @@ export function PitStopEntry({ laps, addPitStop, pitStops, locked }) {
 export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked }) {
   const [packName, setPackName] = useState('');
   const [capacity, setCapacity] = useState('');
+  const [customCapacity, setCustomCapacity] = useState('');
   const [swapLap, setSwapLap] = useState('');
   const [jetiReading, setJetiReading] = useState('');
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
+  const effectiveCapacity = capacity === 'custom' ? customCapacity : capacity;
+
   const handleSubmit = async () => {
-    if (!packName || !capacity) return;
+    // Both the pack's rated capacity AND the JETI reading at swap are required —
+    // these are two distinct numbers (rated capacity vs. mAh actually used by the
+    // outgoing pack) and must not be conflated into a single value.
+    if (!packName || !effectiveCapacity || !jetiReading) return;
     setSaving(true);
     try {
-      // Store the JETI reading at the time of swap as the capacity used by the previous pack
-      await addBatterySwap(packName, parseFloat(jetiReading || capacity), parseInt(swapLap) || laps.length, notes);
-      setMsg(`✓ ${packName} (${capacity}mAh) logged at lap ${swapLap || laps.length}`);
-      setPackName(''); setCapacity(''); setSwapLap(''); setJetiReading(''); setNotes('');
+      await addBatterySwap(packName, parseFloat(effectiveCapacity), parseFloat(jetiReading), parseInt(swapLap) || laps.length, notes);
+      const remaining = Math.max(0, parseFloat(effectiveCapacity) - parseFloat(jetiReading));
+      setMsg(`✓ ${packName} logged at lap ${swapLap || laps.length} — ~${Math.round(remaining)}mAh remained`);
+      setPackName(''); setCapacity(''); setCustomCapacity(''); setSwapLap(''); setJetiReading(''); setNotes('');
     } catch (e) { setMsg(`Error: ${e.message}`); }
     finally { setSaving(false); }
   };
@@ -146,8 +152,8 @@ export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked })
         <Metric label="Current pack" value={batteryPacks.length > 0 ? batteryPacks[batteryPacks.length-1].pack_name : '—'} />
       </div>
 
-      <Alert type="info">
-        When swapping: first note the JETI mAh reading, then physically swap the battery, then log it here. This keeps the cumulative total accurate.
+      <Alert type="warn">
+        ⚠ Read the JETI mAh BEFORE swapping — once the new pack is in, the JETI resets to 0 and that number is gone for good. Order: 1) read JETI, 2) swap pack, 3) log it here.
       </Alert>
 
       <Card>
@@ -169,13 +175,16 @@ export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked })
           {capacity === 'custom' && (
             <div>
               <label className="field-label">Custom capacity (mAh)</label>
-              <input type="number" value={''} onChange={e => setCapacity(e.target.value)} placeholder="e.g. 3000" />
+              <input type="number" value={customCapacity} onChange={e => setCustomCapacity(e.target.value)} placeholder="e.g. 3000" />
             </div>
           )}
           <div>
             <label className="field-label">JETI reading before swap (mAh)</label>
             <input type="number" value={jetiReading} onChange={e => setJetiReading(e.target.value)}
               placeholder="mAh shown on JETI" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+            <div style={{ fontSize: 10, color: '#D97706', marginTop: 3, fontWeight: 600 }}>
+              ⚠ Read this BEFORE swapping — resets to 0 after
+            </div>
           </div>
           <div>
             <label className="field-label">Swap lap</label>
@@ -189,7 +198,7 @@ export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked })
             placeholder="e.g. swapped due to low voltage" />
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <Btn onClick={handleSubmit} disabled={saving || !packName || !capacity || locked}>
+          <Btn onClick={handleSubmit} disabled={saving || !packName || !effectiveCapacity || !jetiReading || locked}>
             {saving ? 'Saving…' : 'Log battery swap'}
           </Btn>
           {msg && <span style={{ fontSize: 12, color: '#059669', fontWeight: 500 }}>{msg}</span>}
@@ -200,22 +209,44 @@ export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked })
       {batteryPacks.length === 0 ? (
         <div style={{ fontSize: 13, color: '#9CA3AF', padding: '12px 0' }}>No packs logged yet</div>
       ) : (
-        batteryPacks.map((p, i) => (
-          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', marginBottom: 6, background: '#F9FAFB', border: '1.5px solid #E5E7EB', borderRadius: 8, borderLeft: `4px solid #3B82F6` }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#EFF6FF', border: '2px solid #3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 800, color: '#1E40AF', flexShrink: 0 }}>
-              {i + 1}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-                {p.pack_name} · {p.capacity_mah} mAh
+        batteryPacks.map((p, i) => {
+          // Prefer the DB-computed column; fall back to a client-side calc for
+          // rows where mah_used_at_swap exists but the generated column doesn't
+          // (e.g. migration ran but old client cache); show '—' for rows from
+          // before the migration where only the single ambiguous value exists.
+          const hasSplitData = p.mah_used_at_swap !== null && p.mah_used_at_swap !== undefined;
+          const remaining = p.mah_remaining_at_swap !== null && p.mah_remaining_at_swap !== undefined
+            ? p.mah_remaining_at_swap
+            : hasSplitData
+              ? Math.max(0, parseFloat(p.capacity_mah || 0) - parseFloat(p.mah_used_at_swap || 0))
+              : null;
+
+          return (
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', marginBottom: 6, background: '#F9FAFB', border: '1.5px solid #E5E7EB', borderRadius: 8, borderLeft: `4px solid #3B82F6` }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#EFF6FF', border: '2px solid #3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 800, color: '#1E40AF', flexShrink: 0 }}>
+                {i + 1}
               </div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
-                Swapped in at lap {p.swap_lap} · JETI read {p.capacity_mah} mAh
-                {p.notes ? ` · ${p.notes}` : ''}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                  {p.pack_name} · {p.capacity_mah} mAh rated
+                </div>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                  Swapped in at lap {p.swap_lap}
+                  {hasSplitData ? ` · JETI read ${p.mah_used_at_swap} mAh` : ''}
+                  {p.notes ? ` · ${p.notes}` : ''}
+                </div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 16, fontWeight: 600, color: remaining === null ? '#9CA3AF' : '#059669' }}>
+                  {remaining === null ? '—' : `${Math.round(remaining)} mAh`}
+                </div>
+                <div style={{ fontSize: 9, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  remaining
+                </div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
     </div>
   );

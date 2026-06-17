@@ -48,10 +48,11 @@ export function useRaceEvents(sessionId) {
     if (error) throw error;
   }, [sessionId]);
 
-  const addBatterySwap = useCallback(async (packName, capacityMah, swapLap, notes) => {
+  const addBatterySwap = useCallback(async (packName, capacityMah, mahUsedAtSwap, swapLap, notes) => {
     const { error } = await supabase.from('battery_packs').insert({
       session_id: sessionId, pack_name: packName,
-      capacity_mah: capacityMah, swap_lap: swapLap, notes,
+      capacity_mah: capacityMah, mah_used_at_swap: mahUsedAtSwap,
+      swap_lap: swapLap, notes,
     });
     if (error) throw error;
   }, [sessionId]);
@@ -62,9 +63,10 @@ export function useRaceEvents(sessionId) {
     const swapsBefore = batteryPacks
       .filter(p => p.swap_lap && p.swap_lap <= lapNumber)
       .sort((a, b) => a.swap_lap - b.swap_lap);
-    // The offset is the sum of capacities of all packs that have been fully used
-    // We track this by storing the mAh reading at the time of swap
-    return swapsBefore.reduce((sum, p) => sum + (parseFloat(p.capacity_mah) || 0), 0);
+    // The offset is the sum of mAh actually used by each prior pack at the
+    // time it was swapped out — NOT its rated capacity, since a pack may be
+    // swapped before it's fully drained.
+    return swapsBefore.reduce((sum, p) => sum + (parseFloat(p.mah_used_at_swap ?? p.capacity_mah) || 0), 0);
   }, [batteryPacks]);
 
   // Get total cumulative mAh across all battery swaps + current pack reading
