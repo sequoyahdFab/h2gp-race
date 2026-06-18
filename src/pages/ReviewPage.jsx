@@ -2,6 +2,8 @@ import React, { useMemo, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { calcStats, fmtTime, fmtDuration, lapSpeed } from '../lib/calc';
 import { reasonMeta } from '../lib/constants';
+import { getPostRaceFlags } from '../lib/postRaceAnalysis';
+import { RaceAdvisorSummary } from '../components/RaceAdvisorSummary';
 
 Chart.register(...registerables);
 
@@ -39,6 +41,8 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
   const batChartInst = useRef(null);
 
   const stats = useMemo(() => calcStats(laps, session), [laps, session]);
+  const pitStops = useMemo(() => events.filter(e => e.event_type === 'pit_stop'), [events]);
+  const flags = useMemo(() => getPostRaceFlags(laps, session, pitStops, batteryPacks), [laps, session, pitStops, batteryPacks]);
 
   // Final elapsed time
   const finalElapsed = session?.race_start_time && session?.race_end_time
@@ -212,6 +216,10 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
           <StatCard label="Stick swaps" value={swapLaps.length} color="#8B5CF6" />
         </div>
 
+        {/* Race advisor — AI narrative + rule-based flags */}
+        <SectionTitle>Race Advisor</SectionTitle>
+        <RaceAdvisorSummary session={session} stats={stats} flags={flags} laps={laps} />
+
         {/* Lap time chart */}
         <SectionTitle>Lap Times</SectionTitle>
         <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8, fontFamily: "'Barlow', sans-serif" }}>
@@ -270,11 +278,11 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
         )}
 
         {/* Pit stops */}
-        {events.filter(e => e.event_type === 'pit_stop').length > 0 && (
+        {pitStops.length > 0 && (
           <>
             <SectionTitle>Pit Stop Log</SectionTitle>
             <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
-              {events.filter(e => e.event_type === 'pit_stop').map(p => {
+              {pitStops.map(p => {
                 const m = reasonMeta(p.reason);
                 return (
                   <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid #F3F4F6' }}>
