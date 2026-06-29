@@ -10,7 +10,7 @@ import { useRaceEvents } from './hooks/useRaceEvents';
 function RaceRouter({ initialRole }) {
   const { sessionId } = useParams();
   const navigate = useNavigate();
-  const { session, laps, loading, error, addLap, updateLap, startRace, endRace } = useRace(sessionId);
+  const { session, laps, loading, error, addLap, updateLap, startRace, endRace, updateTargetLapTime } = useRace(sessionId);
   const { events, batteryPacks, addPitStop, addBatterySwap } = useRaceEvents(sessionId);
 
   if (loading) return (
@@ -36,6 +36,7 @@ function RaceRouter({ initialRole }) {
       updateLap={updateLap}
       startRace={startRace}
       endRace={endRace}
+      updateTargetLapTime={updateTargetLapTime}
       events={events}
       batteryPacks={batteryPacks}
       addPitStop={addPitStop}
