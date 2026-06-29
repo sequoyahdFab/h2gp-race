@@ -31,11 +31,11 @@ export function ResourceBar({ label, pct, color, valueLabel }) {
   const bg = color || (pct > 40 ? '#059669' : pct > 20 ? '#D97706' : '#DC2626');
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>
-      <div style={{ width: 82, fontSize: 12, color: '#6B7280', flexShrink: 0, fontWeight: 600 }}>{label}</div>
+      <div style={{ width: 82, fontSize: 11, color: '#9CA3AF', flexShrink: 0, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
       <div className="bar-track">
         <div className="bar-fill" style={{ width: `${Math.min(100, Math.max(0, pct))}%`, background: bg }} />
       </div>
-      <div style={{ width: 52, textAlign: 'right', fontSize: 12, fontFamily: "'DM Mono', monospace", color: '#374151', fontWeight: 500 }}>{valueLabel}</div>
+      <div style={{ width: 52, textAlign: 'right', fontSize: 12, fontFamily: "'Barlow', sans-serif", color: '#374151', fontWeight: 600 }}>{valueLabel}</div>
     </div>
   );
 }
