@@ -16,6 +16,14 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
   const [mahXAxis, setMahXAxis] = useState('lap'); // 'lap' | 'time'
   const [editingTarget, setEditingTarget] = useState(false);
   const [pendingTarget, setPendingTarget] = useState('');
+  const [raceDayView, setRaceDayView] = useState(() =>
+    typeof localStorage !== 'undefined' && localStorage.getItem('h2gp-strategy-view') === 'raceday'
+  );
+
+  const toggleView = (v) => {
+    setRaceDayView(v === 'raceday');
+    localStorage.setItem('h2gp-strategy-view', v);
+  };
   const interpolated = useMemo(() => interpolateLaps(laps), [laps]);
   const stats = useMemo(() => calcStats(interpolated, session), [interpolated, session]);
 
@@ -204,15 +212,171 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
   return (
     <div style={{ maxWidth: '100%' }}>
 
+      {/* View toggle */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+        <div style={{ display: 'flex', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 8, padding: 2, gap: 2 }}>
+          {[['standard', 'Standard'], ['raceday', 'Race day']].map(([v, label]) => (
+            <button
+              key={v}
+              onClick={() => toggleView(v)}
+              style={{
+                padding: '4px 14px', fontSize: 12, borderRadius: 6, border: 'none', cursor: 'pointer',
+                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, letterSpacing: '0.03em',
+                background: (raceDayView ? 'raceday' : 'standard') === v ? '#FFFFFF' : 'transparent',
+                color: (raceDayView ? 'raceday' : 'standard') === v ? '#111827' : '#6B7280',
+                boxShadow: (raceDayView ? 'raceday' : 'standard') === v ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                transition: 'all 0.15s',
+              }}
+            >{label}</button>
+          ))}
+        </div>
+      </div>
+
       {/* Alerts — full width */}
       {alerts.map((a, i) => <Alert key={i} type={a.type}>{a.msg}</Alert>)}
       {alerts.length === 0 && n > 0 && <Alert type="ok">All systems nominal</Alert>}
 
-      {/* Two-column above-the-fold layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.6fr)', gap: 16, marginBottom: 20, alignItems: 'start' }}>
+      {/* ── RACE DAY VIEW ─────────────────────────────────────────────────── */}
+      {raceDayView && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-        {/* LEFT — decisions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Big 4 metrics */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
+              <div className="metric-label">Battery</div>
+              <div style={{ fontSize: 38, fontWeight: 500, color: batPct < 20 ? '#DC2626' : batPct < 40 ? '#D97706' : '#059669', lineHeight: 1 }}>
+                {Math.round(batPct)}<span style={{ fontSize: 22 }}>%</span>
+              </div>
+              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{Math.round(batRem).toLocaleString()} mAh left</div>
+            </div>
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
+              <div className="metric-label">Avg lap</div>
+              <div style={{ fontSize: 38, fontWeight: 500, color: '#111827', lineHeight: 1 }}>
+                {avgLap ? fmtLapTime(avgLap) : '—'}
+              </div>
+              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+                target {fmtLapTime(session?.target_lap_time ?? 20)}
+                {avgLap && session?.target_lap_time && (
+                  <span style={{
+                    fontSize: 11, padding: '1px 6px', borderRadius: 4,
+                    background: Math.abs(avgLap - session.target_lap_time) < 1 ? '#ECFDF5' : '#FFFBEB',
+                    color: Math.abs(avgLap - session.target_lap_time) < 1 ? '#065F46' : '#92400E',
+                  }}>
+                    {avgLap > session.target_lap_time ? '+' : ''}{(avgLap - session.target_lap_time).toFixed(1)}s
+                  </span>
+                )}
+                {updateTargetLapTime && !session?.race_end_time && (
+                  <button onClick={() => { setPendingTarget(String(session?.target_lap_time ?? 20)); setEditingTarget(t => !t); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px', color: '#9CA3AF', fontSize: 12 }}
+                    title="Adjust target">✏️</button>
+                )}
+              </div>
+              {editingTarget && (
+                <div style={{ background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 8, padding: '10px 12px', marginTop: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, color: '#92400E' }}>New target:</span>
+                    <input type="number" value={pendingTarget} onChange={e => setPendingTarget(e.target.value)}
+                      min={5} max={120} step={0.5}
+                      style={{ width: 70, fontSize: 14, textAlign: 'center', borderRadius: 6, border: '1.5px solid #D97706', padding: '3px 6px' }}
+                      autoFocus />
+                    <span style={{ fontSize: 12, color: '#92400E' }}>s</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#92400E', marginBottom: 8 }}>⚠️ Updates all 5 dashboards in real time.</div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button onClick={handleTargetConfirm} style={{ fontSize: 12, padding: '4px 12px', borderRadius: 6, border: '1.5px solid #059669', background: '#ECFDF5', color: '#065F46', cursor: 'pointer' }}>Confirm</button>
+                    <button onClick={() => setEditingTarget(false)} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1.5px solid #D1D5DB', background: 'none', color: '#6B7280', cursor: 'pointer' }}>Cancel</button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
+              <div className="metric-label">mAh / min</div>
+              <div style={{ fontSize: 38, fontWeight: 500, color: mahPerMin && session?.max_mah_per_min && mahPerMin > session.max_mah_per_min ? '#DC2626' : '#111827', lineHeight: 1 }}>
+                {mahPerMin ? mahPerMin.toFixed(1) : '—'}
+              </div>
+              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>max {session?.max_mah_per_min ?? '—'}</div>
+            </div>
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
+              <div className="metric-label">H2 sticks</div>
+              <div style={{ fontSize: 38, fontWeight: 500, color: (totalSticks - sticksUsed) <= 1 ? '#DC2626' : '#111827', lineHeight: 1 }}>
+                {totalSticks - sticksUsed} <span style={{ fontSize: 18, color: '#6B7280' }}>left</span>
+              </div>
+              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{sticksUsed} used · lap {n}</div>
+            </div>
+          </div>
+
+          {/* Bottom two cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8 }}>
+
+            {/* Advisor + electrical */}
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>H2 Stick advisor</div>
+              <StickAdvisor state={advisorState} title={advisorTitle} detail={advisorDetail} />
+              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 12, paddingTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {[
+                  ['FC EMA-7', fcEMA ? `${fcEMA.toFixed(2)} A` : '—'],
+                  ['Voltage', last?.battery_voltage_v ? `${parseFloat(last.battery_voltage_v).toFixed(1)} V` : '—'],
+                  ['Bat current', last?.battery_current_a ? `${parseFloat(last.battery_current_a).toFixed(1)} A` : '—'],
+                  ['FC current', last?.fc_current_a ? `${parseFloat(last.fc_current_a).toFixed(1)} A` : '—'],
+                ].map(([label, val]) => (
+                  <div key={label}>
+                    <div className="metric-label">{label}</div>
+                    <div style={{ fontSize: 20, fontWeight: 500, color: '#111827' }}>{val}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Resources + recent laps */}
+            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
+              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>Resources</div>
+              {[
+                ['Battery', batPct, `${Math.round(batPct)}%`, batPct < 30 ? '#DC2626' : '#059669'],
+                ['Race time', timePct, `${Math.round(timePct)}%`, '#D97706'],
+                ['H2 sticks', totalSticks > 0 ? ((totalSticks - sticksUsed) / totalSticks) * 100 : 0, `${totalSticks - sticksUsed} left`, '#3B82F6'],
+              ].map(([label, pct, val, color]) => (
+                <div key={label} style={{ marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{val}</span>
+                  </div>
+                  <div style={{ height: 8, background: '#F3F4F6', borderRadius: 4, overflow: 'hidden', border: '0.5px solid #E5E7EB' }}>
+                    <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, pct))}%`, background: color, borderRadius: 4 }} />
+                  </div>
+                </div>
+              ))}
+              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 10, paddingTop: 10 }}>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Recent laps</div>
+                {[...laps].reverse().slice(0, 5).map(l => {
+                  const isPit = pitSet.has(l.lap_number);
+                  const delta = avgLap && l.lap_time ? parseFloat(l.lap_time) - (session?.target_lap_time ?? 20) : null;
+                  return (
+                    <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '0.5px solid #F3F4F6', fontSize: 13 }}>
+                      <span style={{ color: '#9CA3AF', width: 28 }}>{l.lap_number}</span>
+                      <span style={{ fontWeight: 500, color: isPit ? '#DC2626' : '#111827' }}>{l.lap_time ? fmtLapTime(l.lap_time) : '—'}</span>
+                      {isPit
+                        ? <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: '#FEE2E2', color: '#B91C1C', fontWeight: 700 }}>PIT</span>
+                        : delta !== null
+                          ? <span style={{ fontSize: 11, color: Math.abs(delta) < 1 ? '#059669' : '#D97706' }}>{delta > 0 ? '+' : ''}{delta.toFixed(1)}s</span>
+                          : <span />
+                      }
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── STANDARD VIEW ─────────────────────────────────────────────────── */}
+      {!raceDayView && (
+        <div>
+        {/* Two-column above-the-fold layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.6fr)', gap: 16, marginBottom: 20, alignItems: 'start' }}>
+
+          {/* LEFT — decisions */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
           {/* Timer */}
           <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px' }}>
@@ -413,6 +577,9 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
       </div>
         </div>
       </div>
+      </div>
+      </div>
+      )}
     </div>
   );
 }
