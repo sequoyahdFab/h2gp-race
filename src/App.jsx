@@ -23,7 +23,7 @@ function RaceRouter({ initialRole, darkMode, toggleDarkMode }) {
   );
 
   if (session?.race_end_time) {
-    return <ReviewPage session={session} laps={laps} events={events} batteryPacks={batteryPacks} onBack={() => navigate('/')} />;
+    return <ReviewPage session={session} laps={laps} events={events} batteryPacks={batteryPacks} onBack={() => navigate('/')} darkMode={darkMode} />;
   }
 
   return (

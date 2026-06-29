@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
-import { calcStats, fmtTime, fmtLapTime, fmtDuration, lapSpeed } from '../lib/calc';
+import { calcStats, fmtTime, fmtDuration, lapSpeed } from '../lib/calc';
 import { reasonMeta } from '../lib/constants';
 import { getPostRaceFlags } from '../lib/postRaceAnalysis';
 import { RaceAdvisorSummary } from '../components/RaceAdvisorSummary';
@@ -10,13 +10,13 @@ Chart.register(...registerables);
 function StatCard({ label, value, unit, color }) {
   return (
     <div style={{
-      background: '#FFFFFF', border: '1.5px solid #E5E7EB',
+      background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)',
       borderRadius: 10, padding: '14px 16px',
       borderTop: `4px solid ${color || '#059669'}`,
     }}>
-      <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 26, fontWeight: 500, color: '#111827', lineHeight: 1 }}>{value ?? '—'}</div>
-      {unit && <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>{unit}</div>}
+      <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 10, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 26, fontWeight: 500, color: 'var(--color-text-primary)', lineHeight: 1 }}>{value ?? '—'}</div>
+      {unit && <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: 'var(--color-text-subtle)', marginTop: 3 }}>{unit}</div>}
     </div>
   );
 }
@@ -26,7 +26,7 @@ function SectionTitle({ children }) {
     <div style={{
       fontFamily: "'Barlow Condensed', sans-serif",
       fontSize: 14, fontWeight: 800,
-      color: '#9CA3AF', textTransform: 'uppercase',
+      color: 'var(--color-text-subtle)', textTransform: 'uppercase',
       letterSpacing: '0.1em', margin: '24px 0 10px',
     }}>
       {children}
@@ -34,7 +34,7 @@ function SectionTitle({ children }) {
   );
 }
 
-export default function ReviewPage({ session, laps, events = [], batteryPacks = [], onBack }) {
+export default function ReviewPage({ session, laps, events = [], batteryPacks = [], onBack, darkMode = false }) {
   const lapChartRef = useRef(null);
   const batChartRef = useRef(null);
   const lapChartInst = useRef(null);
@@ -110,13 +110,13 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
           }
         },
         scales: {
-          x: { ticks: { font: { size: 10 }, color: '#9CA3AF', autoSkip: true, maxTicksLimit: 20 }, grid: { color: '#F3F4F6' } },
-          y: { ticks: { font: { size: 10 }, color: '#9CA3AF' }, grid: { color: '#F3F4F6' } },
+          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 20 }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
+          y: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
         },
       },
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [laps, session]);
+  }, [laps, session, darkMode]);
 
   // Battery + FC drain chart
   useEffect(() => {
@@ -146,14 +146,14 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
       },
       options: {
         responsive: true, maintainAspectRatio: false, animation: false,
-        plugins: { legend: { display: true, labels: { font: { size: 10, family: 'Barlow' }, color: '#6B7280' } } },
+        plugins: { legend: { display: true, labels: { font: { size: 10, family: 'Barlow' }, color: darkMode ? '#6B7280' : '#6B7280' } } },
         scales: {
-          x: { ticks: { font: { size: 10 }, color: '#9CA3AF', autoSkip: true, maxTicksLimit: 20 }, grid: { color: '#F3F4F6' } },
-          y: { ticks: { font: { size: 10 }, color: '#9CA3AF' }, grid: { color: '#F3F4F6' }, title: { display: true, text: 'mAh', font: { size: 10 }, color: '#9CA3AF' } },
+          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 20 }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
+          y: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' }, title: { display: true, text: 'mAh', font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' } },
         },
       },
     });
-  }, [laps]);
+  }, [laps, darkMode]);
 
   return (
     <div>
@@ -186,7 +186,7 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
             style={{ fontSize: 12, padding: '6px 10px' }}
             onClick={() => {
               const header = 'lap_number,lap_time,battery_cap_mah,fc_cap_mah,battery_current_a,fc_current_a,battery_voltage_v,stick_swap,source\n';
-              const rows = laps.map(l => [l.lap_number, l.lap_time != null ? fmtLapTime(parseFloat(l.lap_time)) : '',l.battery_cap_mah,l.fc_cap_mah,l.battery_current_a,l.fc_current_a,l.battery_voltage_v,l.stick_swap?1:0,l.source].join(',')).join('\n');
+              const rows = laps.map(l => [l.lap_number,l.lap_time,l.battery_cap_mah,l.fc_cap_mah,l.battery_current_a,l.fc_current_a,l.battery_voltage_v,l.stick_swap?1:0,l.source].join(',')).join('\n');
               const a = document.createElement('a');
               a.href = URL.createObjectURL(new Blob([header+rows],{type:'text/csv'}));
               a.download = `h2gp_${session?.name?.replace(/\s+/g,'_')}.csv`;
@@ -208,8 +208,8 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 8 }}>
           <StatCard label="Final time" value={finalElapsed ? fmtDuration(finalElapsed) : '—'} color="#111827" />
           <StatCard label="Total laps" value={laps.length} color="#3B82F6" />
-          <StatCard label="Avg lap" value={stats.avgLap ? fmtLapTime(stats.avgLap) : '—'} unit="" color="#059669" />
-          <StatCard label="Best lap" value={bestLap ? fmtLapTime(parseFloat(bestLap.lap_time)) : '—'} unit={bestLap ? `Lap ${bestLap.lap_number}` : ''} color="#DC2626" />
+          <StatCard label="Avg lap" value={stats.avgLap ? stats.avgLap.toFixed(2) : '—'} unit="sec" color="#059669" />
+          <StatCard label="Best lap" value={bestLap ? parseFloat(bestLap.lap_time).toFixed(2) : '—'} unit={bestLap ? `Lap ${bestLap.lap_number}` : ''} color="#DC2626" />
           <StatCard label="Battery used" value={totalBatUsed ?? '—'} unit={batPctUsed ? `${batPctUsed}% of limit` : 'mAh'} color="#3B82F6" />
           <StatCard label="FC total" value={totalFCUsed ?? '—'} unit="mAh" color="#059669" />
           <StatCard label="Avg drain" value={stats.mahPerMin ? stats.mahPerMin.toFixed(1) : '—'} unit="mAh/min" color="#D97706" />
@@ -222,16 +222,16 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
 
         {/* Lap time chart */}
         <SectionTitle>Lap Times</SectionTitle>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 8, fontFamily: "'Barlow', sans-serif" }}>
+        <div style={{ fontSize: 11, color: 'var(--color-text-subtle)', marginBottom: 8, fontFamily: "'Barlow', sans-serif" }}>
           🔴 Best lap &nbsp;·&nbsp; 🟠 H2 stick swap &nbsp;·&nbsp; — — Target pace
         </div>
-        <div style={{ height: 180, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+        <div style={{ height: 180, background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
           <canvas ref={lapChartRef} role="img" aria-label="Lap time chart" />
         </div>
 
         {/* Drain chart */}
         <SectionTitle>Battery + Fuel Cell Drain</SectionTitle>
-        <div style={{ height: 180, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+        <div style={{ height: 180, background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: 12, marginBottom: 8 }}>
           <canvas ref={batChartRef} role="img" aria-label="Battery and fuel cell drain chart" />
         </div>
 
@@ -239,7 +239,7 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
         {swapLaps.length > 0 && (
           <>
             <SectionTitle>H2 Stick Swap Timeline</SectionTitle>
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
+            <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
               {swapLaps.map((l, i) => {
                 const prevSwap = i === 0 ? null : swapLaps[i - 1];
                 const lapsSince = prevSwap ? l.lap_number - prevSwap.lap_number : l.lap_number;
@@ -249,23 +249,23 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
                 return (
                   <div key={l.id} style={{
                     display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '8px 0', borderBottom: i < swapLaps.length - 1 ? '1px solid #F3F4F6' : 'none',
+                    padding: '8px 0', borderBottom: i < swapLaps.length - 1 ? '1px solid var(--color-border)' : 'none',
                   }}>
                     <div style={{
                       width: 32, height: 32, borderRadius: '50%',
-                      background: '#FFFBEB', border: '2px solid #D97706',
+                      background: 'var(--color-warning-bg)', border: '2px solid #D97706',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 800, color: '#92400E',
+                      fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 800, color: 'var(--color-warning-text)',
                       flexShrink: 0,
                     }}>
                       #{i + 1}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: '#111827' }}>
+                      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>
                         Stick {i + 1} → Stick {i + 2} &nbsp;
-                        <span style={{ fontWeight: 400, color: '#6B7280' }}>after lap {l.lap_number}</span>
+                        <span style={{ fontWeight: 400, color: 'var(--color-text-muted)' }}>after lap {l.lap_number}</span>
                       </div>
-                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                      <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: 'var(--color-text-subtle)', marginTop: 2 }}>
                         {lapsSince} laps on stick · {fmtTime(timeSince)} elapsed
                         {l.fc_current_a ? ` · FC at ${parseFloat(l.fc_current_a).toFixed(2)}A` : ''}
                       </div>
@@ -281,17 +281,17 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
         {pitStops.length > 0 && (
           <>
             <SectionTitle>Pit Stop Log</SectionTitle>
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
+            <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
               {pitStops.map(p => {
                 const m = reasonMeta(p.reason);
                 return (
-                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid #F3F4F6' }}>
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: '1px solid var(--color-border)' }}>
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                      <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                         Lap {p.lap_number} · {p.reason}
                       </div>
-                      {p.notes && <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>{p.notes}</div>}
+                      {p.notes && <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 1 }}>{p.notes}</div>}
                     </div>
                     <div style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: m.bg, color: m.color, fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       {m.category}
@@ -307,17 +307,17 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
         {batteryPacks.length > 0 && (
           <>
             <SectionTitle>Battery Pack Log</SectionTitle>
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
+            <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: '12px 16px', marginBottom: 8 }}>
               {batteryPacks.map((p, i) => (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '7px 0', borderBottom: i < batteryPacks.length - 1 ? '1px solid #F3F4F6' : 'none' }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#EFF6FF', border: '2px solid #3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 800, color: '#1E40AF', flexShrink: 0 }}>
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '7px 0', borderBottom: i < batteryPacks.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'var(--color-info-bg)', border: '2px solid #3B82F6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 800, color: 'var(--color-info-text)', flexShrink: 0 }}>
                     {i + 1}
                   </div>
                   <div>
-                    <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                    <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                       {p.pack_name} · {p.capacity_mah} mAh
                     </div>
-                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                    <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: 'var(--color-text-subtle)', marginTop: 2 }}>
                       Swapped in at lap {p.swap_lap}{p.notes ? ` · ${p.notes}` : ''}
                     </div>
                   </div>
@@ -329,7 +329,7 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
 
         {/* Full lap table */}
         <SectionTitle>Full Lap Log</SectionTitle>
-        <div style={{ overflowX: 'auto', border: '1.5px solid #E5E7EB', borderRadius: 10, maxHeight: 400, overflowY: 'auto' }}>
+        <div style={{ overflowX: 'auto', border: '1.5px solid var(--color-border)', borderRadius: 10, maxHeight: 400, overflowY: 'auto' }}>
           <table className="data-table" style={{ minWidth: 520 }}>
             <thead>
               <tr>
@@ -348,9 +348,9 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
                 const isBest = bestLap && l.id === bestLap.id;
                 return (
                   <tr key={l.id} className={l.stick_swap ? 'swap-row' : ''}>
-                    <td style={{ color: '#111827', fontWeight: 500 }}>{l.lap_number}</td>
+                    <td style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>{l.lap_number}</td>
                     <td style={{ color: isBest ? '#DC2626' : '#059669', fontWeight: isBest ? 700 : 400 }}>
-                      {l.lap_time ? fmtLapTime(parseFloat(l.lap_time)) : '—'}{isBest ? ' ★' : ''}
+                      {l.lap_time || '—'}{isBest ? ' ★' : ''}
                     </td>
                     <td>{sp && <span className={`badge badge-${sp}`}>{sp}</span>}</td>
                     <td>{l.battery_cap_mah ? Math.round(l.battery_cap_mah) : '—'}</td>
@@ -363,7 +363,7 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
                 );
               })}
               {laps.length === 0 && (
-                <tr><td colSpan={9} style={{ textAlign: 'center', padding: 20, color: '#9CA3AF' }}>No lap data</td></tr>
+                <tr><td colSpan={9} style={{ textAlign: 'center', padding: 20, color: 'var(--color-text-subtle)' }}>No lap data</td></tr>
               )}
             </tbody>
           </table>

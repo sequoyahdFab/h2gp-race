@@ -48,7 +48,7 @@ export function PitStopEntry({ laps, addPitStop, pitStops, locked }) {
           <div>
             <label className="field-label">Reason</label>
             <select value={reason} onChange={e => setReason(e.target.value)}
-              style={{ width: '100%', color: reason ? '#111827' : '#9CA3AF' }}>
+              style={{ width: '100%', color: reason ? 'var(--color-text-primary)' : 'var(--color-text-subtle)' }}>
               <option value="">Select reason…</option>
               {PIT_REASONS.map(group => (
                 <optgroup key={group.category} label={group.category}>
@@ -71,7 +71,7 @@ export function PitStopEntry({ laps, addPitStop, pitStops, locked }) {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 6, background: meta.bg, border: `1px solid ${meta.color}20`, marginBottom: 12 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: meta.color, flexShrink: 0 }} />
             <span style={{ fontSize: 12, fontWeight: 600, color: meta.color }}>{meta.category}</span>
-            <span style={{ fontSize: 12, color: '#374151' }}>· {reason}</span>
+            <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>· {reason}</span>
           </div>
         )}
 
@@ -85,18 +85,18 @@ export function PitStopEntry({ laps, addPitStop, pitStops, locked }) {
 
       <SectionLabel>Pit stop history</SectionLabel>
       {pitStops.length === 0 ? (
-        <div style={{ fontSize: 13, color: '#9CA3AF', padding: '12px 0' }}>No pit stops logged yet</div>
+        <div style={{ fontSize: 13, color: 'var(--color-text-subtle)', padding: '12px 0' }}>No pit stops logged yet</div>
       ) : (
         [...pitStops].reverse().map(p => {
           const m = reasonMeta(p.reason);
           return (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #F3F4F6' }}>
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--color-border)' }}>
               <div style={{ width: 10, height: 10, borderRadius: '50%', background: m.color, flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#111827', fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                   Lap {p.lap_number} · {p.reason}
                 </div>
-                {p.notes && <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>{p.notes}</div>}
+                {p.notes && <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 1 }}>{p.notes}</div>}
               </div>
               <div style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 4, background: m.bg, color: m.color, fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {m.category}
@@ -207,7 +207,7 @@ export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked })
 
       <SectionLabel>Battery pack history</SectionLabel>
       {batteryPacks.length === 0 ? (
-        <div style={{ fontSize: 13, color: '#9CA3AF', padding: '12px 0' }}>No packs logged yet</div>
+        <div style={{ fontSize: 13, color: 'var(--color-text-subtle)', padding: '12px 0' }}>No packs logged yet</div>
       ) : (
         batteryPacks.map((p, i) => {
           // Prefer the DB-computed column; fall back to a client-side calc for
@@ -227,10 +227,10 @@ export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked })
                 {i + 1}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                   {p.pack_name} · {p.capacity_mah} mAh rated
                 </div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: 'var(--color-text-subtle)', marginTop: 2 }}>
                   Swapped in at lap {p.swap_lap}
                   {hasSplitData ? ` · JETI read ${p.mah_used_at_swap} mAh` : ''}
                   {p.notes ? ` · ${p.notes}` : ''}
@@ -240,7 +240,7 @@ export function BatterySwapEntry({ laps, batteryPacks, addBatterySwap, locked })
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 16, fontWeight: 600, color: remaining === null ? '#9CA3AF' : '#059669' }}>
                   {remaining === null ? '—' : `${Math.round(remaining)} mAh`}
                 </div>
-                <div style={{ fontSize: 9, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                <div style={{ fontSize: 9, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   remaining
                 </div>
               </div>
