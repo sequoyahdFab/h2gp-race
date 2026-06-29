@@ -107,7 +107,7 @@ function LapLogTab({ laps, pitStops }) {
 export default function RacePage({
   session, laps, addLap, updateLap, startRace, endRace, updateTargetLapTime,
   events, batteryPacks, addPitStop, addBatterySwap,
-  initialRole = 'strategy', onBack
+  initialRole = 'strategy', onBack, darkMode = false, toggleDarkMode = null
 }) {
   const [role, setRole] = useState(initialRole);
   const [postRaceSecsLeft, setPostRaceSecsLeft] = useState(null);
@@ -208,6 +208,11 @@ export default function RacePage({
               )}
             </div>
           )}
+          {toggleDarkMode && (
+              <button onClick={toggleDarkMode} style={{ background: 'transparent', border: '1.5px solid #374151', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', color: '#9CA3AF', fontSize: 16, lineHeight: 1 }} title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+                {darkMode ? '☀️' : '🌙'}
+              </button>
+            )}
           <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px' }} onClick={exportCSV}>Export CSV</button>
           <button className="btn-ghost-dark" style={{ fontSize: 12, padding: '6px 10px' }} onClick={onBack}>← Sessions</button>
         </div>
