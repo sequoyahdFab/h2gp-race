@@ -87,7 +87,25 @@ export function useRace(sessionId) {
     if (error) throw error;
   }, [sessionId]);
 
-  return { session, laps, loading, error, addLap, updateLap, startRace, endRace, refetch: fetchData };
+  const updateTargetLapTime = useCallback(async (newTarget, currentLapNumber) => {
+    const { error: sessErr } = await supabase
+      .from('sessions')
+      .update({ target_lap_time: newTarget })
+      .eq('id', sessionId);
+    if (sessErr) throw sessErr;
+
+    const { error: evtErr } = await supabase
+      .from('race_events')
+      .insert({
+        session_id: sessionId,
+        lap_number: currentLapNumber,
+        event_type: 'target_change',
+        notes: `Target lap time changed to ${newTarget}s`,
+      });
+    if (evtErr) throw evtErr;
+  }, [sessionId]);
+
+  return { session, laps, loading, error, addLap, updateLap, startRace, endRace, updateTargetLapTime, refetch: fetchData };
 }
 
 export function useSessions() {
