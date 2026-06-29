@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { Metric, ResourceBar, StickDisplay, StickAdvisor, Alert, SectionLabel, ProjRow, Card } from './UI';
-import { calcStats, fmtTime, fmtDuration, lapSpeed, interpolateLaps } from '../lib/calc';
+import { calcStats, fmtTime, fmtLapTime, fmtDuration, lapSpeed, interpolateLaps } from '../lib/calc';
 import { PaceAdvisor } from './PaceAdvisor';
 import { reasonMeta } from '../lib/constants';
 
@@ -253,8 +253,8 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
 
           {/* Key metrics */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-            <Metric label="Avg lap" value={avgLap ? avgLap.toFixed(1) : '—'} unit="sec"
-              hint={session?.target_lap_time ? `target: ${session.target_lap_time}s` : undefined} />
+            <Metric label="Avg lap" value={avgLap ? fmtLapTime(avgLap) : '—'} unit=""
+              hint={session?.target_lap_time ? `target: ${fmtLapTime(session.target_lap_time)}` : undefined} />
             <Metric label="mAh/min" value={mahPerMin ? mahPerMin.toFixed(1) : '—'}
               hint={session?.max_mah_per_min ? `max: ${session.max_mah_per_min} mAh/min` : undefined} />
             <Metric label="Bat remain" value={Math.round(batRem)} unit="mAh"
@@ -274,7 +274,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
               {updateTargetLapTime && !session?.race_end_time && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ fontSize: 11, color: '#6B7280' }}>
-                    Target: <strong>{session?.target_lap_time ?? 20}s</strong>
+                    Target: <strong>{fmtLapTime(session?.target_lap_time ?? 20)}</strong>
                   </span>
                   <button
                     onClick={() => { setPendingTarget(String(session?.target_lap_time ?? 20)); setEditingTarget(t => !t); }}
@@ -385,7 +385,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
               return (
                 <tr key={l.id} style={{ background: isPit ? '#FEF2F2' : l.stick_swap ? '#FFFBEB' : 'transparent' }}>
                   <td style={{ color: '#111827', fontWeight: 500 }}>{l.lap_number}</td>
-                  <td style={{ color: isPit ? '#DC2626' : '#059669', fontWeight: isPit ? 700 : 400 }}>{l.lap_time || '—'}</td>
+                  <td style={{ color: isPit ? '#DC2626' : '#059669', fontWeight: isPit ? 700 : 400 }}>{l.lap_time ? fmtLapTime(l.lap_time) : '—'}</td>
                   <td>{sp && <span className={`badge badge-${sp}`}>{sp}</span>}</td>
                   <td>{l.battery_cap_mah ? Math.round(l.battery_cap_mah) : '—'}</td>
                   <td>{l.fc_cap_mah ? Math.round(l.fc_cap_mah) : '—'}</td>

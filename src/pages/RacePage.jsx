@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StrategyDashboard from '../components/StrategyDashboard';
 import { LapTimeEntry, CapacityEntry, CurrentEntry, VoltageEntry } from '../components/EntryPanels';
 import { PitStopEntry, BatterySwapEntry } from '../components/EventsPanel';
+import { fmtLapTime } from '../lib/calc';
 
 const ROLES = [
   { id: 'strategy',     label: 'Strategy',    emoji: '📊' },
@@ -74,7 +75,7 @@ function LapLogTab({ laps, pitStops }) {
                   <tr key={l.id} style={{ background: rowBg }}>
                     <td style={td({ color: '#6B7280', fontWeight: 600 })}>{l.lap_number}</td>
                     <td style={td({ color: isBest ? '#059669' : '#111827', fontWeight: isBest ? 700 : 400 })}>
-                      {l.lap_time != null ? `${parseFloat(l.lap_time).toFixed(3)}s` : '—'}
+                      {l.lap_time != null ? fmtLapTime(parseFloat(l.lap_time)) : '—'}
                       {isBest && <span style={{ marginLeft: 5, fontSize: 10, background: '#059669', color: '#fff', borderRadius: 3, padding: '1px 5px', fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>BEST</span>}
                     </td>
                     <td style={td()}>{l.battery_cap_mah != null ? l.battery_cap_mah : '—'}</td>
@@ -125,7 +126,7 @@ export default function RacePage({
 
   const exportCSV = () => {
     const header = 'lap_number,lap_time,battery_cap_mah,fc_cap_mah,battery_current_a,fc_current_a,battery_voltage_v,stick_swap,source\n';
-    const rows = laps.map(l => [l.lap_number,l.lap_time,l.battery_cap_mah,l.fc_cap_mah,l.battery_current_a,l.fc_current_a,l.battery_voltage_v,l.stick_swap?1:0,l.source].join(',')).join('\n');
+    const rows = laps.map(l => [l.lap_number, l.lap_time != null ? fmtLapTime(parseFloat(l.lap_time)) : '',l.battery_cap_mah,l.fc_cap_mah,l.battery_current_a,l.fc_current_a,l.battery_voltage_v,l.stick_swap?1:0,l.source].join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([header+rows],{type:'text/csv'}));
     a.download = `h2gp_${session?.name?.replace(/\s+/g,'_')||'race'}.csv`;

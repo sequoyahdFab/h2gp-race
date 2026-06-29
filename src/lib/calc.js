@@ -25,6 +25,17 @@ export function interpolateLaps(laps) {
   }));
 }
 
+// Format seconds to M:SS.sss (always shows minutes, e.g. 0:39.952)
+export function fmtLapTime(s) {
+  if (s === null || s === undefined) return '—';
+  const sec = parseFloat(s);
+  if (isNaN(sec) || sec <= 0) return '—';
+  const m = Math.floor(sec / 60);
+  const rem = sec - m * 60;
+  const remStr = rem.toFixed(3).padStart(6, '0');
+  return `${m}:${remStr}`;
+}
+
 // Format seconds to M:SS
 export function fmtTime(s) {
   if (s === null || s === undefined || isNaN(s)) return '—';

@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
-import { calcStats, fmtTime, fmtDuration, lapSpeed } from '../lib/calc';
+import { calcStats, fmtTime, fmtLapTime, fmtDuration, lapSpeed } from '../lib/calc';
 import { reasonMeta } from '../lib/constants';
 import { getPostRaceFlags } from '../lib/postRaceAnalysis';
 import { RaceAdvisorSummary } from '../components/RaceAdvisorSummary';
@@ -186,7 +186,7 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
             style={{ fontSize: 12, padding: '6px 10px' }}
             onClick={() => {
               const header = 'lap_number,lap_time,battery_cap_mah,fc_cap_mah,battery_current_a,fc_current_a,battery_voltage_v,stick_swap,source\n';
-              const rows = laps.map(l => [l.lap_number,l.lap_time,l.battery_cap_mah,l.fc_cap_mah,l.battery_current_a,l.fc_current_a,l.battery_voltage_v,l.stick_swap?1:0,l.source].join(',')).join('\n');
+              const rows = laps.map(l => [l.lap_number, l.lap_time != null ? fmtLapTime(parseFloat(l.lap_time)) : '',l.battery_cap_mah,l.fc_cap_mah,l.battery_current_a,l.fc_current_a,l.battery_voltage_v,l.stick_swap?1:0,l.source].join(',')).join('\n');
               const a = document.createElement('a');
               a.href = URL.createObjectURL(new Blob([header+rows],{type:'text/csv'}));
               a.download = `h2gp_${session?.name?.replace(/\s+/g,'_')}.csv`;
@@ -208,8 +208,8 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: 8 }}>
           <StatCard label="Final time" value={finalElapsed ? fmtDuration(finalElapsed) : '—'} color="#111827" />
           <StatCard label="Total laps" value={laps.length} color="#3B82F6" />
-          <StatCard label="Avg lap" value={stats.avgLap ? stats.avgLap.toFixed(2) : '—'} unit="sec" color="#059669" />
-          <StatCard label="Best lap" value={bestLap ? parseFloat(bestLap.lap_time).toFixed(2) : '—'} unit={bestLap ? `Lap ${bestLap.lap_number}` : ''} color="#DC2626" />
+          <StatCard label="Avg lap" value={stats.avgLap ? fmtLapTime(stats.avgLap) : '—'} unit="" color="#059669" />
+          <StatCard label="Best lap" value={bestLap ? fmtLapTime(parseFloat(bestLap.lap_time)) : '—'} unit={bestLap ? `Lap ${bestLap.lap_number}` : ''} color="#DC2626" />
           <StatCard label="Battery used" value={totalBatUsed ?? '—'} unit={batPctUsed ? `${batPctUsed}% of limit` : 'mAh'} color="#3B82F6" />
           <StatCard label="FC total" value={totalFCUsed ?? '—'} unit="mAh" color="#059669" />
           <StatCard label="Avg drain" value={stats.mahPerMin ? stats.mahPerMin.toFixed(1) : '—'} unit="mAh/min" color="#D97706" />
@@ -350,7 +350,7 @@ export default function ReviewPage({ session, laps, events = [], batteryPacks = 
                   <tr key={l.id} className={l.stick_swap ? 'swap-row' : ''}>
                     <td style={{ color: '#111827', fontWeight: 500 }}>{l.lap_number}</td>
                     <td style={{ color: isBest ? '#DC2626' : '#059669', fontWeight: isBest ? 700 : 400 }}>
-                      {l.lap_time || '—'}{isBest ? ' ★' : ''}
+                      {l.lap_time ? fmtLapTime(parseFloat(l.lap_time)) : '—'}{isBest ? ' ★' : ''}
                     </td>
                     <td>{sp && <span className={`badge badge-${sp}`}>{sp}</span>}</td>
                     <td>{l.battery_cap_mah ? Math.round(l.battery_cap_mah) : '—'}</td>
