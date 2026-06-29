@@ -131,7 +131,7 @@ function MissedAlert({ missedLaps, role, onFillBack }) {
 }
 
 // ── Submit + Skip button row ───────────────────────────────────────────────
-function SubmitRow({ onSubmit, onSkip, disabled, submitLabel }) {
+function SubmitRow({ onSubmit, onSkip, disabled, submitLabel, locked }) {
   return (
     <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
       <Btn onClick={onSubmit} disabled={disabled} style={{ flex: 1 }}>
@@ -139,14 +139,16 @@ function SubmitRow({ onSubmit, onSkip, disabled, submitLabel }) {
       </Btn>
       <button
         onClick={onSkip}
+        disabled={locked}
         style={{
           background: '#fff', color: '#D97706',
           border: '0.5px solid #FCD34D',
           borderRadius: 'var(--border-radius-md)',
           padding: '9px 14px', fontSize: 13, fontWeight: 600,
-          cursor: 'pointer', whiteSpace: 'nowrap',
-          fontFamily: "'Barlow Condensed', sans-serif',",
+          cursor: locked ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
+          fontFamily: "'Barlow Condensed', sans-serif",
           letterSpacing: '0.02em', textTransform: 'uppercase',
+          opacity: locked ? 0.5 : 1,
         }}
       >
         Skip
@@ -193,7 +195,9 @@ function LapLogRow({ lap, valueStr, status, onFillBack }) {
 // ── Shared hook for fill-back logic ───────────────────────────────────────
 function useFillBack(laps, currentLap, getStatus) {
   const [fillBackLap, setFillBackLap] = useState(null);
-  const activeLap = fillBackLap || currentLap;
+  // Use fillBackLap if set, otherwise next lap to be entered (currentLap + 1),
+  // with a minimum of 1 so skip works even when laps array is empty
+  const activeLap = fillBackLap || Math.max(1, currentLap + 1);
 
   // Only include previous laps (not current) that are genuinely missed
   const missedLaps = laps.length > 1
@@ -347,7 +351,7 @@ export function CapacityEntry({ session, laps, addLap, updateLap, locked }) {
           <FastField label="Battery cap (mAh)" id="bc" value={batCap} onChange={setBatCap} placeholder="e.g. 338" autoFocus onTab={() => document.getElementById('cap-fc-f')?.focus()} onEnter={() => document.getElementById('cap-fc-f')?.focus()} />
           <FastField label="FC cap (mAh)" id="cap-fc-f" value={fcCap} onChange={setFcCap} placeholder="e.g. 198" onEnter={handleSubmit} />
         </div>
-        <SubmitRow onSubmit={handleSubmit} onSkip={handleSkip} disabled={saving || (!batCap && !fcCap) || locked} submitLabel={saving ? 'Saving…' : `Log lap ${activeLap}`} />
+        <SubmitRow onSubmit={handleSubmit} onSkip={handleSkip} disabled={saving || (!batCap && !fcCap) || locked} submitLabel={saving ? 'Saving…' : `Log lap ${activeLap}`} locked={locked} />
         <div style={{ fontSize: 11, color: '#9CA3AF' }}>Tab between fields · Enter to submit · Skip if reading was missed</div>
       </Card>
       <SectionLabel>Lap log</SectionLabel>
@@ -444,7 +448,7 @@ export function CurrentEntry({ session, laps, addLap, updateLap, locked }) {
           <FastField label="Battery current (A)" id="ba" value={batCur} onChange={setBatCur} placeholder="e.g. 3.5" autoFocus onTab={() => document.getElementById('cur-fc-f')?.focus()} onEnter={() => document.getElementById('cur-fc-f')?.focus()} />
           <FastField label="FC current (A)" id="cur-fc-f" value={fcCur} onChange={setFcCur} placeholder="e.g. 2.1" onEnter={handleSubmit} />
         </div>
-        <SubmitRow onSubmit={handleSubmit} onSkip={handleSkip} disabled={saving || (!batCur && !fcCur) || locked} submitLabel={saving ? 'Saving…' : `Log lap ${activeLap}`} />
+        <SubmitRow onSubmit={handleSubmit} onSkip={handleSkip} disabled={saving || (!batCur && !fcCur) || locked} submitLabel={saving ? 'Saving…' : `Log lap ${activeLap}`} locked={locked} />
         <div style={{ fontSize: 11, color: '#9CA3AF' }}>Tab between fields · Enter to submit · Skip if reading was missed</div>
       </Card>
       <SectionLabel>Lap log</SectionLabel>
@@ -543,7 +547,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
             H2 stick swapped this lap
           </span>
         </div>
-        <SubmitRow onSubmit={handleSubmit} onSkip={handleSkip} disabled={saving || !voltage || locked} submitLabel={saving ? 'Saving…' : stickSwap ? `Log lap ${activeLap} + swap` : `Log lap ${activeLap}`} />
+        <SubmitRow onSubmit={handleSubmit} onSkip={handleSkip} disabled={saving || !voltage || locked} submitLabel={saving ? 'Saving…' : stickSwap ? `Log lap ${activeLap} + swap` : `Log lap ${activeLap}`} locked={locked} />
         <div style={{ fontSize: 11, color: '#9CA3AF' }}>Enter to submit · Skip if reading was missed</div>
       </Card>
       <SectionLabel>Voltage trend</SectionLabel>
