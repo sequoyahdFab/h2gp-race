@@ -75,8 +75,8 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
         responsive: true, maintainAspectRatio: false, animation: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
-          y: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
+          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: darkMode ? '#30394a' : '#F3F4F6' } },
+          y: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' }, grid: { color: darkMode ? '#30394a' : '#F3F4F6' } },
         },
       },
     });
@@ -169,10 +169,10 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
           },
         },
         scales: {
-          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
+          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: darkMode ? '#30394a' : '#F3F4F6' } },
           y: {
             ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', callback: v => `${v}` },
-            grid: { color: darkMode ? '#2d3748' : '#F3F4F6' },
+            grid: { color: darkMode ? '#30394a' : '#F3F4F6' },
             title: { display: true, text: 'mAh/min', font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' },
           },
         },
@@ -214,7 +214,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
 
       {/* View toggle */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-        <div style={{ display: 'flex', background: 'var(--color-bg-surface-2)', border: '1px solid #E5E7EB', borderRadius: 8, padding: 2, gap: 2 }}>
+        <div style={{ display: 'flex', background: 'var(--color-bg-surface-2)', border: '1px solid var(--color-border)', borderRadius: 8, padding: 2, gap: 2 }}>
           {[['standard', 'Standard'], ['raceday', 'Race day']].map(([v, label]) => (
             <button
               key={v}
@@ -291,14 +291,14 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
             </div>
             <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: '14px 16px' }}>
               <div className="metric-label">mAh / min</div>
-              <div style={{ fontSize: 38, fontWeight: 500, color: mahPerMin && session?.max_mah_per_min && mahPerMin > session.max_mah_per_min ? '#DC2626' : '#111827', lineHeight: 1 }}>
+              <div style={{ fontSize: 38, fontWeight: 500, color: mahPerMin && session?.max_mah_per_min && mahPerMin > session.max_mah_per_min ? '#DC2626' : 'var(--color-text-primary)', lineHeight: 1 }}>
                 {mahPerMin ? mahPerMin.toFixed(1) : '—'}
               </div>
               <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>max {session?.max_mah_per_min ?? '—'}</div>
             </div>
             <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: '14px 16px' }}>
               <div className="metric-label">H2 sticks</div>
-              <div style={{ fontSize: 38, fontWeight: 500, color: (totalSticks - sticksUsed) <= 1 ? '#DC2626' : '#111827', lineHeight: 1 }}>
+              <div style={{ fontSize: 38, fontWeight: 500, color: (totalSticks - sticksUsed) <= 1 ? '#DC2626' : 'var(--color-text-primary)', lineHeight: 1 }}>
                 {totalSticks - sticksUsed} <span style={{ fontSize: 18, color: 'var(--color-text-muted)' }}>left</span>
               </div>
               <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>{sticksUsed} used · lap {n}</div>
@@ -312,7 +312,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
             <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: '14px 16px' }}>
               <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>H2 Stick advisor</div>
               <StickAdvisor state={advisorState} title={advisorTitle} detail={advisorDetail} />
-              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 12, paddingTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div style={{ borderTop: '1px solid var(--color-border)', marginTop: 12, paddingTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {[
                   ['FC EMA-7', fcEMA ? `${fcEMA.toFixed(2)} A` : '—'],
                   ['Voltage', last?.battery_voltage_v ? `${parseFloat(last.battery_voltage_v).toFixed(1)} V` : '—'],
@@ -340,20 +340,20 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
                     <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</span>
                     <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-text-secondary)' }}>{val}</span>
                   </div>
-                  <div style={{ height: 8, background: 'var(--color-bg-surface-2)', borderRadius: 4, overflow: 'hidden', border: '0.5px solid #E5E7EB' }}>
+                  <div style={{ height: 8, background: 'var(--color-bg-surface-2)', borderRadius: 4, overflow: 'hidden', border: '0.5px solid var(--color-border)' }}>
                     <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, pct))}%`, background: color, borderRadius: 4 }} />
                   </div>
                 </div>
               ))}
-              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 10, paddingTop: 10 }}>
+              <div style={{ borderTop: '1px solid var(--color-border)', marginTop: 10, paddingTop: 10 }}>
                 <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Recent laps</div>
                 {[...laps].reverse().slice(0, 5).map(l => {
                   const isPit = pitSet.has(l.lap_number);
                   const delta = avgLap && l.lap_time ? parseFloat(l.lap_time) - (session?.target_lap_time ?? 20) : null;
                   return (
-                    <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '0.5px solid #F3F4F6', fontSize: 13 }}>
+                    <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '0.5px solid var(--color-border)', fontSize: 13 }}>
                       <span style={{ color: 'var(--color-text-subtle)', width: 28 }}>{l.lap_number}</span>
-                      <span style={{ fontWeight: 500, color: isPit ? '#DC2626' : '#111827' }}>{l.lap_time ? fmtLapTime(l.lap_time) : '—'}</span>
+                      <span style={{ fontWeight: 500, color: isPit ? '#DC2626' : 'var(--color-text-primary)' }}>{l.lap_time ? fmtLapTime(l.lap_time) : '—'}</span>
                       {isPit
                         ? <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: '#FEE2E2', color: '#B91C1C', fontWeight: 700 }}>PIT</span>
                         : delta !== null

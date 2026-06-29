@@ -107,18 +107,18 @@ function AppInner() {
         }
 
         [data-theme="dark"] {
-          --color-bg-page: #0f1117;
-          --color-bg-card: #1a2035;
-          --color-bg-surface: #222c42;
-          --color-bg-surface-2: #162030;
-          --color-border: #2d3748;
+          --color-bg-page: #0d1117;
+          --color-bg-card: #1c2333;
+          --color-bg-surface: #262f3e;
+          --color-bg-surface-2: #1a2233;
+          --color-border: #30394a;
           --color-border-md: #4a5568;
-          --color-text-primary: #f0f4f8;
-          --color-text-secondary: #cbd5e0;
-          --color-text-muted: #718096;
-          --color-text-subtle: #4a5568;
-          --color-tab-bg: #1a2035;
-          --color-tab-border: #2d3748;
+          --color-text-primary: #e6edf3;
+          --color-text-secondary: #c9d1d9;
+          --color-text-muted: #8b949e;
+          --color-text-subtle: #6e7681;
+          --color-tab-bg: #1c2333;
+          --color-tab-border: #30394a;
           --color-success-bg: #064e3b;
           --color-success-text: #6ee7b7;
           --color-success-border: #059669;
