@@ -373,7 +373,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
       {!raceDayView && (
         <div>
         {/* Two-column above-the-fold layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.6fr)', gap: 16, marginBottom: 20, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 340px) minmax(0, 1fr)', gap: 16, marginBottom: 20, alignItems: 'start' }}>
 
           {/* LEFT — decisions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

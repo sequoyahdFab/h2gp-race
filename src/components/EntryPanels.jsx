@@ -253,6 +253,7 @@ export function LapTimeEntry({ session, laps, addLap, updateLap, locked }) {
         <Metric label="Avg lap" value={stats.avgLap ? stats.avgLap.toFixed(1) : '—'} unit="sec" />
         <Metric label="Last lap" value={laps[laps.length-1]?.lap_time ?? '—'} unit="sec" />
       </div>
+      <div style={{ maxWidth: 800 }}>
       <Card>
         <SectionLabel style={{ marginTop: 0 }}>Lap {nextLap}</SectionLabel>
         <div style={{ marginBottom: 12 }}>
@@ -275,6 +276,7 @@ export function LapTimeEntry({ session, laps, addLap, updateLap, locked }) {
           </span>
         </div>
       ))}
+      </div>
     </div>
   );
 }
@@ -338,6 +340,7 @@ export function CapacityEntry({ session, laps, addLap, updateLap, locked }) {
         <Metric label="Current lap" value={currentLap} />
       </div>
       <MissedAlert missedLaps={missedLaps} role="cap" onFillBack={setFillBackLap} />
+      <div style={{ maxWidth: 800 }}>
       <LapBeacon lapNum={activeLap} subtitle="Battery cap + FC cap from JETI" fillBack={!!fillBackLap} />
       {fillBackLap && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
@@ -362,6 +365,7 @@ export function CapacityEntry({ session, laps, addLap, updateLap, locked }) {
           onFillBack={lapStatus(l) === 'miss' && l.lap_number !== currentLap ? setFillBackLap : null}
         />
       ))}
+      </div>
     </div>
   );
 }
@@ -435,6 +439,7 @@ export function CurrentEntry({ session, laps, addLap, updateLap, locked }) {
       {fcEMA !== null && fcEMA <= fcLow && <Alert type="danger">FC EMA {fcEMA.toFixed(2)}A — below {fcLow}A trigger! Notify strategy!</Alert>}
       {fcEMA !== null && fcEMA > fcLow && fcEMA <= fcLow + 0.3 && <Alert type="warn">FC EMA {fcEMA.toFixed(2)}A — approaching trigger</Alert>}
       <MissedAlert missedLaps={missedLaps} role="cur" onFillBack={setFillBackLap} />
+      <div style={{ maxWidth: 800 }}>
       <LapBeacon lapNum={activeLap} subtitle="Battery current + FC current from JETI" fillBack={!!fillBackLap} />
       {fillBackLap && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
@@ -459,6 +464,7 @@ export function CurrentEntry({ session, laps, addLap, updateLap, locked }) {
           onFillBack={lapStatus(l) === 'miss' && l.lap_number !== currentLap ? setFillBackLap : null}
         />
       ))}
+      </div>
     </div>
   );
 }
@@ -522,6 +528,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
       </div>
       {last?.battery_voltage_v && parseFloat(last.battery_voltage_v) < 7.0 && <Alert type="warn">Voltage at {parseFloat(last.battery_voltage_v).toFixed(1)}V — monitor closely</Alert>}
       <MissedAlert missedLaps={missedLaps} role="volt" onFillBack={setFillBackLap} />
+      <div style={{ maxWidth: 800 }}>
       <LapBeacon lapNum={activeLap} subtitle="Battery voltage from JETI" fillBack={!!fillBackLap} />
       {fillBackLap && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
@@ -558,6 +565,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
           onFillBack={lapStatus(l) === 'miss' && l.lap_number !== currentLap ? setFillBackLap : null}
         />
       ))}
+      </div>
     </div>
   );
 }
