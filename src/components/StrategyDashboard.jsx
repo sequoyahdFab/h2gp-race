@@ -577,8 +577,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
       </div>
         </div>
       </div>
-      </div>
-      </div>
+        </div>
       )}
     </div>
   );
