@@ -88,9 +88,20 @@ export function useRace(sessionId) {
   }, [sessionId]);
 
   const updateTargetLapTime = useCallback(async (newTarget, currentLapNumber) => {
+    // Shift fast/slow thresholds by the same absolute offset as the original target
+    const currentTarget = session?.target_lap_time ?? newTarget;
+    const fastOffset = session?.fast_threshold != null ? session.fast_threshold - currentTarget : 0;
+    const slowOffset = session?.slow_threshold != null ? session.slow_threshold - currentTarget : 0;
+
+    const updates = {
+      target_lap_time: newTarget,
+      ...(session?.fast_threshold != null && { fast_threshold: newTarget + fastOffset }),
+      ...(session?.slow_threshold != null && { slow_threshold: newTarget + slowOffset }),
+    };
+
     const { error: sessErr } = await supabase
       .from('sessions')
-      .update({ target_lap_time: newTarget })
+      .update(updates)
       .eq('id', sessionId);
     if (sessErr) throw sessErr;
 
@@ -103,7 +114,7 @@ export function useRace(sessionId) {
         notes: `Target lap time changed to ${newTarget}s`,
       });
     if (evtErr) throw evtErr;
-  }, [sessionId]);
+  }, [sessionId, session]);
 
   return { session, laps, loading, error, addLap, updateLap, startRace, endRace, updateTargetLapTime, refetch: fetchData };
 }
