@@ -232,7 +232,7 @@ export default function RacePage({
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 24px 48px' }}>
+      <div style={{ padding: '16px 24px 48px' }}>
         {role === 'strategy'     && <StrategyDashboard session={session} laps={laps} pitStops={pitStops} batteryPacks={batteryPacks || []} updateTargetLapTime={updateTargetLapTime} />}
         {role === 'lap-timer'    && <LapTimeEntry {...entryProps} />}
         {role === 'capacity'     && <CapacityEntry {...entryProps} />}
