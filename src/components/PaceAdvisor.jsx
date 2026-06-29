@@ -147,38 +147,38 @@ export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
 
       {/* 4 key pack stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
-        <div style={{ background: '#F9FAFB', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Pack projects</div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 500, color: state === 'good' ? '#059669' : state === 'slow_down' ? '#DC2626' : '#D97706' }}>
+        <div style={{ background: 'var(--color-bg-surface)', border: '1.5px solid var(--color-border)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Pack projects</div>
+          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 20, fontWeight: 500, color: state === 'good' ? '#059669' : state === 'slow_down' ? '#DC2626' : '#D97706' }}>
             {projectedPackMins.toFixed(0)}
           </div>
-          <div style={{ fontSize: 10, color: '#9CA3AF' }}>min (target {targetPackMins})</div>
+          <div style={{ fontSize: 10, color: 'var(--color-text-subtle)' }}>min (target {targetPackMins})</div>
         </div>
-        <div style={{ background: '#F9FAFB', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Pack remain</div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 500, color: '#111827' }}>{Math.round(packMahRem)}</div>
-          <div style={{ fontSize: 10, color: '#9CA3AF' }}>mAh left</div>
+        <div style={{ background: 'var(--color-bg-surface)', border: '1.5px solid var(--color-border)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Pack remain</div>
+          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 20, fontWeight: 500, color: 'var(--color-text-primary)' }}>{Math.round(packMahRem)}</div>
+          <div style={{ fontSize: 10, color: 'var(--color-text-subtle)' }}>mAh left</div>
         </div>
-        <div style={{ background: '#F9FAFB', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Pack time left</div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 500, color: '#111827' }}>
+        <div style={{ background: 'var(--color-bg-surface)', border: '1.5px solid var(--color-border)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Pack time left</div>
+          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 20, fontWeight: 500, color: 'var(--color-text-primary)' }}>
             {packTimeRemMins > 0 ? fmtTime(packTimeRemMins * 60) : '—'}
           </div>
-          <div style={{ fontSize: 10, color: '#9CA3AF' }}>at target rate</div>
+          <div style={{ fontSize: 10, color: 'var(--color-text-subtle)' }}>at target rate</div>
         </div>
-        <div style={{ background: '#F9FAFB', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Race budget</div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 500, color: totalPctUsed > 90 ? '#DC2626' : '#111827' }}>
+        <div style={{ background: 'var(--color-bg-surface)', border: '1.5px solid var(--color-border)', borderRadius: 8, padding: '10px 12px', textAlign: 'center' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 4 }}>Race budget</div>
+          <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 20, fontWeight: 500, color: totalPctUsed > 90 ? '#DC2626' : 'var(--color-text-primary)' }}>
             {totalPctUsed.toFixed(0)}%
           </div>
-          <div style={{ fontSize: 10, color: '#9CA3AF' }}>of {totalBudgetMah} mAh used</div>
+          <div style={{ fontSize: 10, color: 'var(--color-text-subtle)' }}>of {totalBudgetMah} mAh used</div>
         </div>
       </div>
 
       {/* Pack timeline */}
       {sortedPacks.length > 0 && (
-        <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8, fontFamily: "'Barlow', sans-serif" }}>Battery pack timeline</div>
+        <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8, fontFamily: "'Barlow', sans-serif" }}>Battery pack timeline</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {sortedPacks.map((p, i) => {
               const isActive = i === sortedPacks.length - 1;
@@ -186,13 +186,13 @@ export function PaceAdvisor({ session, laps, batteryPacks = [], elapsed }) {
                 <div key={p.id} style={{
                   flex: 1, minWidth: 80,
                   padding: '8px 10px', borderRadius: 6,
-                  background: isActive ? '#ECFDF5' : '#F9FAFB',
-                  border: `1.5px solid ${isActive ? '#059669' : '#E5E7EB'}`,
+                  background: isActive ? 'var(--color-success-bg)' : 'var(--color-bg-surface)',
+                  border: `1.5px solid ${isActive ? '#059669' : 'var(--color-border)'}`,
                 }}>
-                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, color: isActive ? '#065F46' : '#6B7280', textTransform: 'uppercase' }}>
+                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, color: isActive ? 'var(--color-success-text)' : 'var(--color-text-muted)', textTransform: 'uppercase' }}>
                     {p.pack_name} {isActive ? '● active' : '✓ done'}
                   </div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>
+                  <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: 11, color: 'var(--color-text-subtle)', marginTop: 2 }}>
                     {p.capacity_mah} mAh · lap {p.swap_lap}
                   </div>
                 </div>

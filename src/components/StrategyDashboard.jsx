@@ -7,7 +7,7 @@ import { reasonMeta } from '../lib/constants';
 
 Chart.register(...registerables);
 
-export default function StrategyDashboard({ session, laps, pitStops = [], batteryPacks = [], updateTargetLapTime = null }) {
+export default function StrategyDashboard({ session, laps, pitStops = [], batteryPacks = [], updateTargetLapTime = null, darkMode = false }) {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   const mahChartRef = useRef(null);
@@ -16,14 +16,6 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
   const [mahXAxis, setMahXAxis] = useState('lap'); // 'lap' | 'time'
   const [editingTarget, setEditingTarget] = useState(false);
   const [pendingTarget, setPendingTarget] = useState('');
-  const [raceDayView, setRaceDayView] = useState(() =>
-    typeof localStorage !== 'undefined' && localStorage.getItem('h2gp-strategy-view') === 'raceday'
-  );
-
-  const toggleView = (v) => {
-    setRaceDayView(v === 'raceday');
-    localStorage.setItem('h2gp-strategy-view', v);
-  };
   const interpolated = useMemo(() => interpolateLaps(laps), [laps]);
   const stats = useMemo(() => calcStats(interpolated, session), [interpolated, session]);
 
@@ -75,12 +67,12 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
         responsive: true, maintainAspectRatio: false, animation: false,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { font: { size: 10 }, color: '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: '#F3F4F6' } },
-          y: { ticks: { font: { size: 10 }, color: '#9CA3AF' }, grid: { color: '#F3F4F6' } },
+          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
+          y: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
         },
       },
     });
-  }, [laps, session, pitStops]);
+  }, [laps, session, pitStops, darkMode]);
 
   // ── mAh/min chart ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -160,7 +152,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
         plugins: {
           legend: {
             display: true,
-            labels: { font: { size: 10 }, color: '#6B7280', boxWidth: 20, padding: 10 },
+            labels: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#6B7280', boxWidth: 20, padding: 10 },
           },
           tooltip: {
             callbacks: {
@@ -169,16 +161,16 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
           },
         },
         scales: {
-          x: { ticks: { font: { size: 10 }, color: '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: '#F3F4F6' } },
+          x: { ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', autoSkip: true, maxTicksLimit: 16 }, grid: { color: darkMode ? '#2d3748' : '#F3F4F6' } },
           y: {
-            ticks: { font: { size: 10 }, color: '#9CA3AF', callback: v => `${v}` },
-            grid: { color: '#F3F4F6' },
-            title: { display: true, text: 'mAh/min', font: { size: 10 }, color: '#9CA3AF' },
+            ticks: { font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF', callback: v => `${v}` },
+            grid: { color: darkMode ? '#2d3748' : '#F3F4F6' },
+            title: { display: true, text: 'mAh/min', font: { size: 10 }, color: darkMode ? '#6B7280' : '#9CA3AF' },
           },
         },
       },
     });
-  }, [laps, session, mahXAxis]);
+  }, [laps, session, mahXAxis, darkMode]);
 
   const { n, batUsed, batRem, batPct, avgLap, mahPerMin, fcPerMin, batTimeRem, estTotalLaps, sticksUsed, advisorState, advisorTitle, advisorDetail, raceMins, totalSticks, fcEMA, trendDeclining } = stats;
 
@@ -212,175 +204,19 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
   return (
     <div style={{ maxWidth: '100%' }}>
 
-      {/* View toggle */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
-        <div style={{ display: 'flex', background: '#F3F4F6', border: '1px solid #E5E7EB', borderRadius: 8, padding: 2, gap: 2 }}>
-          {[['standard', 'Standard'], ['raceday', 'Race day']].map(([v, label]) => (
-            <button
-              key={v}
-              onClick={() => toggleView(v)}
-              style={{
-                padding: '4px 14px', fontSize: 12, borderRadius: 6, border: 'none', cursor: 'pointer',
-                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, letterSpacing: '0.03em',
-                background: (raceDayView ? 'raceday' : 'standard') === v ? '#FFFFFF' : 'transparent',
-                color: (raceDayView ? 'raceday' : 'standard') === v ? '#111827' : '#6B7280',
-                boxShadow: (raceDayView ? 'raceday' : 'standard') === v ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                transition: 'all 0.15s',
-              }}
-            >{label}</button>
-          ))}
-        </div>
-      </div>
-
       {/* Alerts — full width */}
       {alerts.map((a, i) => <Alert key={i} type={a.type}>{a.msg}</Alert>)}
       {alerts.length === 0 && n > 0 && <Alert type="ok">All systems nominal</Alert>}
 
-      {/* ── RACE DAY VIEW ─────────────────────────────────────────────────── */}
-      {raceDayView && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Two-column above-the-fold layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.6fr)', gap: 16, marginBottom: 20, alignItems: 'start' }}>
 
-          {/* Big 4 metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
-              <div className="metric-label">Battery</div>
-              <div style={{ fontSize: 38, fontWeight: 500, color: batPct < 20 ? '#DC2626' : batPct < 40 ? '#D97706' : '#059669', lineHeight: 1 }}>
-                {Math.round(batPct)}<span style={{ fontSize: 22 }}>%</span>
-              </div>
-              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{Math.round(batRem).toLocaleString()} mAh left</div>
-            </div>
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
-              <div className="metric-label">Avg lap</div>
-              <div style={{ fontSize: 38, fontWeight: 500, color: '#111827', lineHeight: 1 }}>
-                {avgLap ? fmtLapTime(avgLap) : '—'}
-              </div>
-              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
-                target {fmtLapTime(session?.target_lap_time ?? 20)}
-                {avgLap && session?.target_lap_time && (
-                  <span style={{
-                    fontSize: 11, padding: '1px 6px', borderRadius: 4,
-                    background: Math.abs(avgLap - session.target_lap_time) < 1 ? '#ECFDF5' : '#FFFBEB',
-                    color: Math.abs(avgLap - session.target_lap_time) < 1 ? '#065F46' : '#92400E',
-                  }}>
-                    {avgLap > session.target_lap_time ? '+' : ''}{(avgLap - session.target_lap_time).toFixed(1)}s
-                  </span>
-                )}
-                {updateTargetLapTime && !session?.race_end_time && (
-                  <button onClick={() => { setPendingTarget(String(session?.target_lap_time ?? 20)); setEditingTarget(t => !t); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '1px 3px', color: '#9CA3AF', fontSize: 12 }}
-                    title="Adjust target">✏️</button>
-                )}
-              </div>
-              {editingTarget && (
-                <div style={{ background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 8, padding: '10px 12px', marginTop: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <span style={{ fontSize: 12, color: '#92400E' }}>New target:</span>
-                    <input type="number" value={pendingTarget} onChange={e => setPendingTarget(e.target.value)}
-                      min={5} max={120} step={0.5}
-                      style={{ width: 70, fontSize: 14, textAlign: 'center', borderRadius: 6, border: '1.5px solid #D97706', padding: '3px 6px' }}
-                      autoFocus />
-                    <span style={{ fontSize: 12, color: '#92400E' }}>s</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: '#92400E', marginBottom: 8 }}>⚠️ Updates all 5 dashboards in real time.</div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={handleTargetConfirm} style={{ fontSize: 12, padding: '4px 12px', borderRadius: 6, border: '1.5px solid #059669', background: '#ECFDF5', color: '#065F46', cursor: 'pointer' }}>Confirm</button>
-                    <button onClick={() => setEditingTarget(false)} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1.5px solid #D1D5DB', background: 'none', color: '#6B7280', cursor: 'pointer' }}>Cancel</button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
-              <div className="metric-label">mAh / min</div>
-              <div style={{ fontSize: 38, fontWeight: 500, color: mahPerMin && session?.max_mah_per_min && mahPerMin > session.max_mah_per_min ? '#DC2626' : '#111827', lineHeight: 1 }}>
-                {mahPerMin ? mahPerMin.toFixed(1) : '—'}
-              </div>
-              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>max {session?.max_mah_per_min ?? '—'}</div>
-            </div>
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
-              <div className="metric-label">H2 sticks</div>
-              <div style={{ fontSize: 38, fontWeight: 500, color: (totalSticks - sticksUsed) <= 1 ? '#DC2626' : '#111827', lineHeight: 1 }}>
-                {totalSticks - sticksUsed} <span style={{ fontSize: 18, color: '#6B7280' }}>left</span>
-              </div>
-              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 4 }}>{sticksUsed} used · lap {n}</div>
-            </div>
-          </div>
-
-          {/* Bottom two cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8 }}>
-
-            {/* Advisor + electrical */}
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
-              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>H2 Stick advisor</div>
-              <StickAdvisor state={advisorState} title={advisorTitle} detail={advisorDetail} />
-              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 12, paddingTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {[
-                  ['FC EMA-7', fcEMA ? `${fcEMA.toFixed(2)} A` : '—'],
-                  ['Voltage', last?.battery_voltage_v ? `${parseFloat(last.battery_voltage_v).toFixed(1)} V` : '—'],
-                  ['Bat current', last?.battery_current_a ? `${parseFloat(last.battery_current_a).toFixed(1)} A` : '—'],
-                  ['FC current', last?.fc_current_a ? `${parseFloat(last.fc_current_a).toFixed(1)} A` : '—'],
-                ].map(([label, val]) => (
-                  <div key={label}>
-                    <div className="metric-label">{label}</div>
-                    <div style={{ fontSize: 20, fontWeight: 500, color: '#111827' }}>{val}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Resources + recent laps */}
-            <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '14px 16px' }}>
-              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>Resources</div>
-              {[
-                ['Battery', batPct, `${Math.round(batPct)}%`, batPct < 30 ? '#DC2626' : '#059669'],
-                ['Race time', timePct, `${Math.round(timePct)}%`, '#D97706'],
-                ['H2 sticks', totalSticks > 0 ? ((totalSticks - sticksUsed) / totalSticks) * 100 : 0, `${totalSticks - sticksUsed} left`, '#3B82F6'],
-              ].map(([label, pct, val, color]) => (
-                <div key={label} style={{ marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</span>
-                    <span style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{val}</span>
-                  </div>
-                  <div style={{ height: 8, background: '#F3F4F6', borderRadius: 4, overflow: 'hidden', border: '0.5px solid #E5E7EB' }}>
-                    <div style={{ height: '100%', width: `${Math.min(100, Math.max(0, pct))}%`, background: color, borderRadius: 4 }} />
-                  </div>
-                </div>
-              ))}
-              <div style={{ borderTop: '1px solid #F3F4F6', marginTop: 10, paddingTop: 10 }}>
-                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Recent laps</div>
-                {[...laps].reverse().slice(0, 5).map(l => {
-                  const isPit = pitSet.has(l.lap_number);
-                  const delta = avgLap && l.lap_time ? parseFloat(l.lap_time) - (session?.target_lap_time ?? 20) : null;
-                  return (
-                    <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', borderBottom: '0.5px solid #F3F4F6', fontSize: 13 }}>
-                      <span style={{ color: '#9CA3AF', width: 28 }}>{l.lap_number}</span>
-                      <span style={{ fontWeight: 500, color: isPit ? '#DC2626' : '#111827' }}>{l.lap_time ? fmtLapTime(l.lap_time) : '—'}</span>
-                      {isPit
-                        ? <span style={{ fontSize: 10, padding: '1px 5px', borderRadius: 3, background: '#FEE2E2', color: '#B91C1C', fontWeight: 700 }}>PIT</span>
-                        : delta !== null
-                          ? <span style={{ fontSize: 11, color: Math.abs(delta) < 1 ? '#059669' : '#D97706' }}>{delta > 0 ? '+' : ''}{delta.toFixed(1)}s</span>
-                          : <span />
-                      }
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── STANDARD VIEW ─────────────────────────────────────────────────── */}
-      {!raceDayView && (
-        <div>
-        {/* Two-column above-the-fold layout */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 340px) minmax(0, 1fr)', gap: 16, marginBottom: 20, alignItems: 'start' }}>
-
-          {/* LEFT — decisions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* LEFT — decisions */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
           {/* Timer */}
-          <div style={{ background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 10, padding: '12px 16px' }}>
-            <div className="big-timer" style={session?.race_end_time ? { color: '#374151' } : {}}>
+          <div style={{ background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 10, padding: '12px 16px' }}>
+            <div className="big-timer" style={session?.race_end_time ? { color: 'var(--color-text-secondary)' } : {}}>
               {fmtDuration(elapsed)}
             </div>
             <div className="timer-rem">
@@ -437,21 +273,21 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
               <SectionLabel style={{ margin: 0 }}>Lap times</SectionLabel>
               {updateTargetLapTime && !session?.race_end_time && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11, color: '#6B7280' }}>
+                  <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
                     Target: <strong>{fmtLapTime(session?.target_lap_time ?? 20)}</strong>
                   </span>
                   <button
                     onClick={() => { setPendingTarget(String(session?.target_lap_time ?? 20)); setEditingTarget(t => !t); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', borderRadius: 4, color: '#9CA3AF', fontSize: 13, lineHeight: 1 }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', borderRadius: 4, color: 'var(--color-text-subtle)', fontSize: 13, lineHeight: 1 }}
                     title="Adjust target lap time"
                   >✏️</button>
                 </div>
               )}
             </div>
             {editingTarget && (
-              <div style={{ background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
+              <div style={{ background: 'var(--color-warning-bg)', border: '1.5px solid var(--color-warning-muted)', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ fontSize: 12, color: '#92400E' }}>New target:</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-warning-text)' }}>New target:</span>
                   <input
                     type="number"
                     value={pendingTarget}
@@ -460,9 +296,9 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
                     style={{ width: 70, fontSize: 14, textAlign: 'center', borderRadius: 6, border: '1.5px solid #D97706', padding: '3px 6px' }}
                     autoFocus
                   />
-                  <span style={{ fontSize: 12, color: '#92400E' }}>s</span>
+                  <span style={{ fontSize: 12, color: 'var(--color-warning-text)' }}>s</span>
                 </div>
-                <div style={{ fontSize: 11, color: '#92400E', marginBottom: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--color-warning-text)', marginBottom: 8 }}>
                   ⚠️ Updates target on all 5 dashboards in real time.
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -472,15 +308,15 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
                   >Confirm</button>
                   <button
                     onClick={() => setEditingTarget(false)}
-                    style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1.5px solid #D1D5DB', background: 'none', color: '#6B7280', cursor: 'pointer' }}
+                    style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1.5px solid var(--color-border-md)', background: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}
                   >Cancel</button>
                 </div>
               </div>
             )}
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
+            <div style={{ fontSize: 11, color: 'var(--color-text-subtle)', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
               🔴 Pit stop &nbsp;·&nbsp; 🟠 H2 swap &nbsp;·&nbsp; — — Target
             </div>
-            <div style={{ height: 130, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10 }}>
+            <div style={{ height: 130, background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 8, padding: 10 }}>
               <canvas ref={chartRef} role="img" aria-label="Lap time chart" />
             </div>
           </div>
@@ -497,9 +333,9 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
                     style={{
                       fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 700,
                       padding: '3px 10px', borderRadius: 5, cursor: 'pointer', textTransform: 'uppercase',
-                      border: `1.5px solid ${mahXAxis === axis ? '#3B82F6' : '#D1D5DB'}`,
-                      background: mahXAxis === axis ? '#EFF6FF' : '#FFFFFF',
-                      color: mahXAxis === axis ? '#1D4ED8' : '#6B7280',
+                      border: `1.5px solid ${mahXAxis === axis ? '#3B82F6' : 'var(--color-border-md)'}`,
+                      background: mahXAxis === axis ? 'var(--color-info-bg)' : 'var(--color-bg-card)',
+                      color: mahXAxis === axis ? '#1D4ED8' : 'var(--color-text-muted)',
                     }}
                   >
                     {axis === 'lap' ? 'By lap' : 'By time'}
@@ -507,12 +343,12 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
                 ))}
               </div>
             </div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
+            <div style={{ fontSize: 11, color: 'var(--color-text-subtle)', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
               <span style={{ color: '#3B82F6', fontWeight: 700 }}>—</span> mAh/min &nbsp;·&nbsp;
               <span style={{ color: '#9333EA', fontWeight: 700 }}>- -</span> Trend &nbsp;·&nbsp;
               <span style={{ color: '#DC2626', fontWeight: 700 }}>- -</span> Limit
             </div>
-            <div style={{ height: 130, background: '#FFFFFF', border: '1.5px solid #E5E7EB', borderRadius: 8, padding: 10 }}>
+            <div style={{ height: 130, background: 'var(--color-bg-card)', border: '1.5px solid var(--color-border)', borderRadius: 8, padding: 10 }}>
               <canvas ref={mahChartRef} role="img" aria-label="mAh per minute chart" />
             </div>
           </div>
@@ -520,7 +356,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
       </div>
 
       {/* BELOW FOLD — projections + recent laps side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 16, borderTop: '1.5px solid #E5E7EB', paddingTop: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 2fr)', gap: 16, borderTop: '1.5px solid var(--color-border)', paddingTop: 16 }}>
         <Card style={{ marginBottom: 0 }}>
           <SectionLabel style={{ marginTop: 0 }}>Projections</SectionLabel>
           <ProjRow label="Est. total laps" value={estTotalLaps ? `${estTotalLaps} laps` : '—'} />
@@ -535,7 +371,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
         {/* Recent laps */}
         <div>
           <SectionLabel>Recent laps</SectionLabel>
-      <div style={{ overflowX: 'auto', border: '1.5px solid #E5E7EB', borderRadius: 8, maxHeight: 360, overflowY: 'auto' }}>
+      <div style={{ overflowX: 'auto', border: '1.5px solid var(--color-border)', borderRadius: 8, maxHeight: 360, overflowY: 'auto' }}>
         <table className="data-table" style={{ minWidth: 500 }}>
           <thead>
             <tr>{['#','Time','Speed','Bat mAh','FC mAh','Bat A','FC A','Volts','Event'].map(h => <th key={h}>{h}</th>)}</tr>
@@ -547,8 +383,8 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
               const pitReason = isPit ? pitStops.find(p => p.lap_number === l.lap_number)?.reason : null;
               const pitMeta = pitReason ? reasonMeta(pitReason) : null;
               return (
-                <tr key={l.id} style={{ background: isPit ? '#FEF2F2' : l.stick_swap ? '#FFFBEB' : 'transparent' }}>
-                  <td style={{ color: '#111827', fontWeight: 500 }}>{l.lap_number}</td>
+                <tr key={l.id} style={{ background: isPit ? 'var(--color-danger-bg)' : l.stick_swap ? 'var(--color-warning-bg)' : 'transparent' }}>
+                  <td style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>{l.lap_number}</td>
                   <td style={{ color: isPit ? '#DC2626' : '#059669', fontWeight: isPit ? 700 : 400 }}>{l.lap_time ? fmtLapTime(l.lap_time) : '—'}</td>
                   <td>{sp && <span className={`badge badge-${sp}`}>{sp}</span>}</td>
                   <td>{l.battery_cap_mah ? Math.round(l.battery_cap_mah) : '—'}</td>
@@ -563,7 +399,7 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
                       </span>
                     )}
                     {l.stick_swap && !isPit && (
-                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 5px', borderRadius: 3, background: '#FFFBEB', color: '#92400E', fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase' }}>
+                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 5px', borderRadius: 3, background: 'var(--color-warning-bg)', color: 'var(--color-warning-text)', fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase' }}>
                         H2 Swap
                       </span>
                     )}
@@ -571,14 +407,12 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
                 </tr>
               );
             })}
-            {laps.length === 0 && <tr><td colSpan={9} style={{ textAlign: 'center', padding: 20, color: '#9CA3AF' }}>No laps logged yet</td></tr>}
+            {laps.length === 0 && <tr><td colSpan={9} style={{ textAlign: 'center', padding: 20, color: 'var(--color-text-subtle)' }}>No laps logged yet</td></tr>}
           </tbody>
         </table>
       </div>
         </div>
       </div>
-        </div>
-      )}
     </div>
   );
 }

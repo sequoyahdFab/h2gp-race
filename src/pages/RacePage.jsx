@@ -238,7 +238,7 @@ export default function RacePage({
 
       {/* Content */}
       <div style={{ padding: '16px 24px 48px' }}>
-        {role === 'strategy'     && <StrategyDashboard session={session} laps={laps} pitStops={pitStops} batteryPacks={batteryPacks || []} updateTargetLapTime={updateTargetLapTime} />}
+        {role === 'strategy'     && <StrategyDashboard session={session} laps={laps} pitStops={pitStops} batteryPacks={batteryPacks || []} updateTargetLapTime={updateTargetLapTime} darkMode={darkMode} />}
         {role === 'lap-timer'    && <LapTimeEntry {...entryProps} />}
         {role === 'capacity'     && <CapacityEntry {...entryProps} />}
         {role === 'current'      && <CurrentEntry {...entryProps} />}
