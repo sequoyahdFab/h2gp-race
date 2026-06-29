@@ -7,13 +7,15 @@ import { reasonMeta } from '../lib/constants';
 
 Chart.register(...registerables);
 
-export default function StrategyDashboard({ session, laps, pitStops = [], batteryPacks = [] }) {
+export default function StrategyDashboard({ session, laps, pitStops = [], batteryPacks = [], updateTargetLapTime = null }) {
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   const mahChartRef = useRef(null);
   const mahChartInstance = useRef(null);
   const [elapsed, setElapsed] = useState(0);
   const [mahXAxis, setMahXAxis] = useState('lap'); // 'lap' | 'time'
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [pendingTarget, setPendingTarget] = useState('');
   const interpolated = useMemo(() => interpolateLaps(laps), [laps]);
   const stats = useMemo(() => calcStats(interpolated, session), [interpolated, session]);
 
@@ -172,6 +174,17 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
 
   const { n, batUsed, batRem, batPct, avgLap, mahPerMin, fcPerMin, batTimeRem, estTotalLaps, sticksUsed, advisorState, advisorTitle, advisorDetail, raceMins, totalSticks, fcEMA, trendDeclining } = stats;
 
+  const handleTargetConfirm = async () => {
+    const val = parseFloat(pendingTarget);
+    if (isNaN(val) || val < 5 || val > 120) return;
+    try {
+      await updateTargetLapTime(val, n);
+      setEditingTarget(false);
+    } catch (e) {
+      console.error('Failed to update target lap time:', e);
+    }
+  };
+
   const timePct = session?.race_start_time ? Math.min(100, (elapsed / (raceMins * 60)) * 100) : 0;
   const timeRem = Math.max(0, raceMins * 60 - elapsed);
   const last = laps[laps.length - 1];
@@ -256,7 +269,50 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
 
           {/* Lap time chart */}
           <div>
-            <SectionLabel>Lap times</SectionLabel>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <SectionLabel style={{ margin: 0 }}>Lap times</SectionLabel>
+              {updateTargetLapTime && !session?.race_end_time && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 11, color: '#6B7280' }}>
+                    Target: <strong>{session?.target_lap_time ?? 20}s</strong>
+                  </span>
+                  <button
+                    onClick={() => { setPendingTarget(String(session?.target_lap_time ?? 20)); setEditingTarget(t => !t); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', borderRadius: 4, color: '#9CA3AF', fontSize: 13, lineHeight: 1 }}
+                    title="Adjust target lap time"
+                  >✏️</button>
+                </div>
+              )}
+            </div>
+            {editingTarget && (
+              <div style={{ background: '#FFFBEB', border: '1.5px solid #FCD34D', borderRadius: 8, padding: '10px 12px', marginBottom: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, color: '#92400E' }}>New target:</span>
+                  <input
+                    type="number"
+                    value={pendingTarget}
+                    onChange={e => setPendingTarget(e.target.value)}
+                    min={5} max={120} step={0.5}
+                    style={{ width: 70, fontSize: 14, textAlign: 'center', borderRadius: 6, border: '1.5px solid #D97706', padding: '3px 6px' }}
+                    autoFocus
+                  />
+                  <span style={{ fontSize: 12, color: '#92400E' }}>s</span>
+                </div>
+                <div style={{ fontSize: 11, color: '#92400E', marginBottom: 8 }}>
+                  ⚠️ Updates target on all 5 dashboards in real time.
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    onClick={handleTargetConfirm}
+                    style={{ fontSize: 12, padding: '4px 12px', borderRadius: 6, border: '1.5px solid #059669', background: '#ECFDF5', color: '#065F46', cursor: 'pointer' }}
+                  >Confirm</button>
+                  <button
+                    onClick={() => setEditingTarget(false)}
+                    style={{ fontSize: 12, padding: '4px 10px', borderRadius: 6, border: '1.5px solid #D1D5DB', background: 'none', color: '#6B7280', cursor: 'pointer' }}
+                  >Cancel</button>
+                </div>
+              </div>
+            )}
             <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, fontFamily: "'Barlow', sans-serif" }}>
               🔴 Pit stop &nbsp;·&nbsp; 🟠 H2 swap &nbsp;·&nbsp; — — Target
             </div>
@@ -315,7 +371,6 @@ export default function StrategyDashboard({ session, laps, pitStops = [], batter
         {/* Recent laps */}
         <div>
           <SectionLabel>Recent laps</SectionLabel>
-      <SectionLabel>Recent laps</SectionLabel>
       <div style={{ overflowX: 'auto', border: '1.5px solid #E5E7EB', borderRadius: 8, maxHeight: 360, overflowY: 'auto' }}>
         <table className="data-table" style={{ minWidth: 500 }}>
           <thead>

@@ -104,7 +104,7 @@ function LapLogTab({ laps, pitStops }) {
 }
 
 export default function RacePage({
-  session, laps, addLap, updateLap, startRace, endRace,
+  session, laps, addLap, updateLap, startRace, endRace, updateTargetLapTime,
   events, batteryPacks, addPitStop, addBatterySwap,
   initialRole = 'strategy', onBack
 }) {
@@ -232,7 +232,7 @@ export default function RacePage({
 
       {/* Content */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 24px 48px' }}>
-        {role === 'strategy'     && <StrategyDashboard session={session} laps={laps} pitStops={pitStops} batteryPacks={batteryPacks || []} />}
+        {role === 'strategy'     && <StrategyDashboard session={session} laps={laps} pitStops={pitStops} batteryPacks={batteryPacks || []} updateTargetLapTime={updateTargetLapTime} />}
         {role === 'lap-timer'    && <LapTimeEntry {...entryProps} />}
         {role === 'capacity'     && <CapacityEntry {...entryProps} />}
         {role === 'current'      && <CurrentEntry {...entryProps} />}
