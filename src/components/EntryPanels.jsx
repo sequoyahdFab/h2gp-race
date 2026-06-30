@@ -195,14 +195,18 @@ function LapLogRow({ lap, valueStr, status, onFillBack }) {
 // ── Shared hook for fill-back logic ───────────────────────────────────────
 function useFillBack(laps, currentLap, getStatus) {
   const [fillBackLap, setFillBackLap] = useState(null);
-  // Use fillBackLap if set, otherwise next lap to be entered (currentLap + 1),
-  // with a minimum of 1 so skip works even when laps array is empty
+  // currentLap is now the highest real lap_number seen (not laps.length —
+  // LiveRC lap numbers can skip if a poll is missed, so array length and
+  // the true lap number diverge over a race). Next lap to enter is always
+  // one past the highest real lap number, with a floor of 1.
   const activeLap = fillBackLap || Math.max(1, currentLap + 1);
 
-  // Only include previous laps (not current) that are genuinely missed
-  const missedLaps = laps.length > 1
-    ? laps.slice(0, -1).filter(l => getStatus(l) === 'miss')
-    : [];
+  // Only include laps that are genuinely missed — excludes the current/highest
+  // lap by number (not array position, since extension-posted laps may not
+  // arrive in strict array order)
+  const missedLaps = laps
+    .filter(l => l.lap_number !== currentLap)
+    .filter(l => getStatus(l) === 'miss');
 
   // Auto-clear fill-back if that lap gets filled or skipped
   useEffect(() => {
@@ -221,7 +225,7 @@ export function LapTimeEntry({ session, laps, addLap, updateLap, locked }) {
   const [saving, setSaving] = useState(false);
   const [flash, triggerFlash] = useFlash();
   const stats = calcStats(laps, session);
-  const currentLap = laps.length;
+  const currentLap = laps.reduce((max, l) => Math.max(max, l.lap_number || 0), 0);
   const nextLap = currentLap + 1;
 
   const handleSubmit = async () => {
@@ -288,7 +292,7 @@ export function CapacityEntry({ session, laps, addLap, updateLap, locked }) {
   const [saving, setSaving] = useState(false);
   const [flash, triggerFlash] = useFlash();
 
-  const currentLap = laps.length;
+  const currentLap = laps.reduce((max, l) => Math.max(max, l.lap_number || 0), 0);
   const last = laps[laps.length - 1];
   const batRem = session ? Math.max(0, session.battery_limit_mah - (last?.battery_cap_mah || 0)) : null;
 
@@ -377,7 +381,7 @@ export function CurrentEntry({ session, laps, addLap, updateLap, locked }) {
   const [saving, setSaving] = useState(false);
   const [flash, triggerFlash] = useFlash();
 
-  const currentLap = laps.length;
+  const currentLap = laps.reduce((max, l) => Math.max(max, l.lap_number || 0), 0);
   const last = laps[laps.length - 1];
   const fcLow = session?.fc_low_amps || 1.0;
 
@@ -476,7 +480,7 @@ export function VoltageEntry({ session, laps, addLap, updateLap, locked }) {
   const [saving, setSaving] = useState(false);
   const [flash, triggerFlash] = useFlash();
 
-  const currentLap = laps.length;
+  const currentLap = laps.reduce((max, l) => Math.max(max, l.lap_number || 0), 0);
   const last = laps[laps.length - 1];
 
   const getVoltStatus = l => l.volt_skipped ? 'skip' : l.battery_voltage_v !== null ? 'ok' : 'miss';
